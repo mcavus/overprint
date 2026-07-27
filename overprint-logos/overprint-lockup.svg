@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="5519px" height="1458px" viewBox="0 0 5519 1458" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+    <!-- Generator: Sketch 56.3 (81716) - https://sketch.com -->
+    <title>overprint-lockup copy</title>
+    <desc>Created with Sketch.</desc>
+    <g id="Page-1" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+        <g id="overprint-lockup-copy" transform="translate(117.000000, 99.000000)">
+            <g id="Group" transform="translate(0.000000, 18.000000)" stroke-width="234">
+                <circle id="Oval" stroke="#14A9E0" cx="540" cy="540" r="540"></circle>
+                <circle id="Oval" stroke="#E6197E" style="mix-blend-mode: multiply;" cx="684" cy="684" r="540"></circle>
+            </g>
+            <text id="overprint" fill="#1A1A1A" font-family="Inter-Regular_Bold, Inter" font-size="936" font-weight="bold">
+                <tspan x="1476" y="907">overprint</tspan>
+            </text>
+        </g>
+    </g>
+</svg>

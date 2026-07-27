@@ -1,0 +1,14 @@
+{% extends "base.html" %}
+{% block title %}{{ title }} · {{ site.title }}{% endblock %}
+{% block content %}
+<div class="post-topbar">
+  <p class="post-back"><a href="index.html">&larr; {{ site.title }}</a></p>
+  {% include "nav.html" %}
+</div>
+<article class="post">
+  <h1 class="post-title">{{ title }}</h1>
+  <div class="post-meta">{{ dateDisplay }} &middot; {{ site.author }}</div>
+  {{ content_html }}
+  {% if tag_links %}<div class="post-tags">{% for t in tag_links %}<a href="{{ t.url }}">{{ t.name }}</a>{% endfor %}</div>{% endif %}
+</article>
+{% endblock %}

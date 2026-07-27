@@ -1,0 +1,13 @@
+title: Studio Journal
+author: Nadia Ellsworth
+description: Notes on craft, process, and the small decisions that add up to a finished thing.
+url: https://studiojournal.example.com
+theme:
+  mode: light
+  accent: "#C2410C"
+  font: sans
+  background: "#F5EBDC"
+nav:
+  - { label: Journal, url: index.html }
+  - { label: About, url: about.html }
+  - { label: Colophon, url: colophon.html }

@@ -1,0 +1,12 @@
+title: Field Notes
+author: Tessa Lindqvist
+description: A small personal blog about writing, kept as plain Markdown files in a folder.
+url: https://fieldnotes.example.com
+theme:
+  mode: light
+  accent: "#0A7AFF"
+  font: serif
+nav:
+  - { label: Writing, url: index.html }
+  - { label: Basics, url: tag-basics.html }
+  - { label: About, url: about.html }

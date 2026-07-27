@@ -1,0 +1,64 @@
+name: CI
+
+# Builds and tests every pull request and every push to main.
+#
+# Deliberately has NO secrets and NO write permissions. It runs code from pull requests, including
+# from forks, so it is treated as untrusted: GitHub already withholds secrets from fork PRs, and
+# `permissions: contents: read` means a malicious PR cannot use the job's token to write to the
+# repository either. Keep it that way. Anything needing a credential belongs in release.yml, which
+# only runs on a tag the maintainer pushes.
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
+
+# A new push to the same PR makes the previous run irrelevant.
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  package:
+    name: Engine and CLI
+    runs-on: macos-15
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Build
+        run: swift build --package-path OverprintKit
+
+      - name: Test
+        run: swift test --package-path OverprintKit
+
+      # The CLI is what an agent or a script drives, so a broken subcommand surface is a real
+      # regression even when the library tests pass.
+      - name: Smoke-test the CLI against a scaffolded site
+        run: |
+          SITE="$(mktemp -d)/demo"
+          swift run --package-path OverprintKit overprint init "$SITE"
+          swift run --package-path OverprintKit overprint new "Hello from CI" --site "$SITE"
+          swift run --package-path OverprintKit overprint validate "$SITE"
+          swift run --package-path OverprintKit overprint build "$SITE"
+          test -f "$SITE/dist/index.html" || { echo "build produced no index.html" >&2; exit 1; }
+
+  app:
+    name: macOS app
+    runs-on: macos-15
+    steps:
+      - uses: actions/checkout@v4
+
+      # Ad-hoc signing only. A PR build is never distributed, and the signing certificate is not
+      # available here by design.
+      - name: Build
+        run: |
+          xcodebuild \
+            -project Overprint/Overprint.xcodeproj \
+            -scheme Overprint \
+            -configuration Debug \
+            -destination 'platform=macOS' \
+            CODE_SIGN_IDENTITY="-" \
+            build

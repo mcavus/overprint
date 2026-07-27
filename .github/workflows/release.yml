@@ -1,0 +1,120 @@
+name: Release
+
+# Push a version tag and this builds, signs, notarizes, and publishes a DMG, then updates the
+# Sparkle appcast so existing installs see the update.
+#
+#   git tag v0.2.0 && git push origin v0.2.0
+#
+# Required repository secrets:
+#   MACOS_CERT_P12          Developer ID Application certificate, base64 of a .p12
+#   MACOS_CERT_PASSWORD     password for that .p12
+#   MACOS_SIGN_IDENTITY     e.g. "Developer ID Application: Your Company (TEAMID)"
+#   MACOS_TEAM_ID           10-character Team ID
+#   NOTARY_KEY_P8           App Store Connect API key, base64 of the .p8
+#   NOTARY_KEY_ID           key id
+#   NOTARY_KEY_ISSUER       issuer id (UUID)
+#   SPARKLE_PRIVATE_KEY     Sparkle EdDSA private key (from generate_keys -x)
+
+on:
+  push:
+    tags: ["v*"]
+  workflow_dispatch:
+    inputs:
+      version:
+        description: "Version to build, for example 0.2.0"
+        required: true
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: macos-15
+    steps:
+      - uses: actions/checkout@v4
+
+      # The dispatch input is user-controlled, so it goes through an env var (never interpolated
+      # into the shell) and is validated before it reaches any later step.
+      - name: Resolve version
+        id: version
+        env:
+          EVENT_NAME: ${{ github.event_name }}
+          INPUT_VERSION: ${{ github.event.inputs.version }}
+          REF_NAME: ${{ github.ref_name }}
+        run: |
+          if [ "$EVENT_NAME" = "workflow_dispatch" ]; then
+            VERSION="$INPUT_VERSION"
+          else
+            VERSION="${REF_NAME#v}"
+          fi
+          if ! printf '%s' "$VERSION" | grep -qE '^[0-9]+\.[0-9]+\.[0-9]+([-.][0-9A-Za-z]+)*$'; then
+            echo "error: '$VERSION' is not a valid semantic version" >&2
+            exit 1
+          fi
+          echo "value=$VERSION" >> "$GITHUB_OUTPUT"
+
+      - name: Run tests
+        run: swift test --package-path OverprintKit
+
+      # A dedicated keychain keeps the certificate off the runner's login keychain and is
+      # discarded with the runner.
+      - name: Import signing certificate
+        env:
+          CERT_P12: ${{ secrets.MACOS_CERT_P12 }}
+          CERT_PASSWORD: ${{ secrets.MACOS_CERT_PASSWORD }}
+        run: |
+          KEYCHAIN=build.keychain
+          KEYCHAIN_PASSWORD=$(uuidgen)
+          security create-keychain -p "$KEYCHAIN_PASSWORD" "$KEYCHAIN"
+          security set-keychain-settings -lut 3600 "$KEYCHAIN"
+          security unlock-keychain -p "$KEYCHAIN_PASSWORD" "$KEYCHAIN"
+          echo "$CERT_P12" | base64 --decode > /tmp/cert.p12
+          security import /tmp/cert.p12 -k "$KEYCHAIN" -P "$CERT_PASSWORD" \
+            -T /usr/bin/codesign -T /usr/bin/productsign
+          security set-key-partition-list -S apple-tool:,apple:,codesign: \
+            -s -k "$KEYCHAIN_PASSWORD" "$KEYCHAIN" >/dev/null
+          security list-keychains -d user -s "$KEYCHAIN" login.keychain
+          rm -f /tmp/cert.p12
+
+      - name: Write notarization key
+        env:
+          NOTARY_KEY_P8: ${{ secrets.NOTARY_KEY_P8 }}
+        run: echo "$NOTARY_KEY_P8" | base64 --decode > /tmp/notary.p8
+
+      - name: Build, sign, notarize, package
+        env:
+          SIGN_IDENTITY: ${{ secrets.MACOS_SIGN_IDENTITY }}
+          TEAM_ID: ${{ secrets.MACOS_TEAM_ID }}
+          NOTARY_KEY_PATH: /tmp/notary.p8
+          NOTARY_KEY_ID: ${{ secrets.NOTARY_KEY_ID }}
+          NOTARY_KEY_ISSUER: ${{ secrets.NOTARY_KEY_ISSUER }}
+          VERSION: ${{ steps.version.outputs.value }}
+        run: Scripts/release.sh "$VERSION"
+
+      - name: Remove the notarization key
+        if: always()
+        run: rm -f /tmp/notary.p8
+
+      - name: Sign the update and build the appcast
+        env:
+          SPARKLE_PRIVATE_KEY: ${{ secrets.SPARKLE_PRIVATE_KEY }}
+          VERSION: ${{ steps.version.outputs.value }}
+        run: Scripts/appcast.sh "$VERSION"
+
+      # Uses the built-in gh CLI rather than a third-party action: this step runs while the
+      # signing certificate and notarization key are still on the runner, so a compromised
+      # third-party action would have access to both.
+      - name: Publish release
+        env:
+          GH_TOKEN: ${{ github.token }}
+          VERSION: ${{ steps.version.outputs.value }}
+        run: |
+          gh release create "v$VERSION" \
+            --title "Overprint $VERSION" \
+            --generate-notes \
+            ".release/Overprint-$VERSION.dmg" \
+            ".release/appcast.xml"
+
+      - name: Clean up secrets from the runner
+        if: always()
+        run: rm -f /tmp/notary.p8

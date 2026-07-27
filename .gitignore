@@ -1,0 +1,83 @@
+# ---- macOS ----
+.DS_Store
+.AppleDouble
+.LSOverride
+Icon
+._*
+.DocumentRevisions-V100
+.fseventsd
+.Spotlight-V100
+.TemporaryItems
+.Trashes
+.VolumeIcon.icns
+.com.apple.timemachine.donotpresent
+
+# ---- Xcode: user-specific ----
+xcuserdata/
+*.xcuserstate
+*.xcscmblueprint
+*.xccheckout
+
+# ---- Xcode: build output ----
+# Anchored with a leading slash on purpose. macOS checkouts default to core.ignoreCase=true,
+# so a bare "build/" also matches the Overprint/Overprint/Build/ SOURCE folder and would
+# silently drop Build mode from the repo.
+/build/
+DerivedData/
+*.moved-aside
+*.pbxuser
+!default.pbxuser
+*.mode1v3
+!default.mode1v3
+*.mode2v3
+!default.mode2v3
+*.perspectivev3
+!default.perspectivev3
+*.hmap
+*.ipa
+*.dSYM.zip
+*.dSYM
+
+# ---- Swift Package Manager ----
+.build/
+.swiftpm/
+Packages/
+# Note: keep Package.resolved committed for the app so builds are reproducible.
+
+# ---- Secrets and local config (never commit) ----
+# Overprint has no API key. The Claude Code subscription token lives in the macOS Keychain and
+# is never written to a file. These patterns are a safety net.
+.env
+.env.*
+*.env
+secrets.plist
+Secrets.swift
+*.key
+*.pem
+*.p12
+*.cer
+# Notarization key from App Store Connect, and Sparkle's EdDSA signing key. Either one in a
+# public repo is a live credential: the .p8 can notarize as you, the Sparkle key can ship
+# arbitrary code to every user as an "update".
+*.p8
+AuthKey_*
+sparkle_priv*
+*.privkey
+*.mobileprovision
+
+# ---- Logs and local junk ----
+*.log
+
+# ---- Overprint: generated site output ----
+# dist/ is engine output. Never commit it, for the examples or for any site.
+dist/
+examples/*/dist/
+
+# ---- Release artifacts (Scripts/release.sh output) ----
+.release/
+
+# ---- Internal maintainer docs, kept out of the public repo ----
+# CLAUDE.md is the project's working memory; RELEASING.md is the maintainer runbook.
+# Both stay on the maintainer's machine, neither ships publicly.
+CLAUDE.md
+RELEASING.md

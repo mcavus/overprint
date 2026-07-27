@@ -1,0 +1,15 @@
+{% extends "base.html" %}
+{% block title %}{{ title }} · {{ site.title }}{% endblock %}
+{% block content %}
+<header class="site-header">
+  <div class="site-header-row">
+    <h1 class="site-title"><a href="index.html">{{ site.title }}</a></h1>
+    {% include "nav.html" %}
+  </div>
+</header>
+<hr class="rule">
+<article class="post">
+  <h1 class="post-title">{{ title }}</h1>
+  {{ content_html }}
+</article>
+{% endblock %}

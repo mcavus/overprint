@@ -1,0 +1,182 @@
+import Foundation
+import Stencil
+
+/// The result of a build: how many posts were written and where.
+public struct BuildSummary: Equatable, Sendable {
+    public var postCount: Int
+    public var outputURL: URL
+}
+
+/// The build pipeline: load the site, render each post and the index through Stencil, and
+/// write a flat `dist/` (`index.html`, `<slug>.html` per post, `assets/style.css`) with
+/// relative links so the output opens directly over `file://`.
+public struct SiteBuilder {
+    public init() {}
+
+    /// Builds the site. `includeDrafts` keeps `draft: true` posts in the pages and index (for
+    /// local preview); the RSS feed, sitemap, and tag pages always exclude drafts.
+    @discardableResult
+    public func build(siteURL: URL, outputURL: URL? = nil, includeDrafts: Bool = true) throws -> BuildSummary {
+        let store = SiteStore(siteURL: siteURL)
+        let config = try store.loadConfig()
+        let allPosts = try store.loadPosts()
+        let published = allPosts.filter { !$0.post.draft }
+        let visible = includeDrafts ? allPosts : published
+        let allPages = try store.loadPages()
+        let visiblePages = includeDrafts ? allPages : allPages.filter { !$0.page.draft }
+        let output = outputURL ?? siteURL.appendingPathComponent("dist")
+
+        guard output.standardizedFileURL != siteURL.standardizedFileURL else {
+            throw OverprintError.io("refusing to build into the site root")
+        }
+
+        let theme = try Theme.bundled()
+        let environment = Environment(loader: DictionaryLoader(templates: theme.templates))
+        let renderer = MarkdownRenderer()
+        let fileManager = FileManager.default
+
+        // Recreate the output directory from scratch.
+        if fileManager.fileExists(atPath: output.path) {
+            try fileManager.removeItem(at: output)
+        }
+        try fileManager.createDirectory(at: output, withIntermediateDirectories: true)
+
+        // Stylesheet.
+        let assetsDir = output.appendingPathComponent("assets")
+        try fileManager.createDirectory(at: assetsDir, withIntermediateDirectories: true)
+        try theme.styleCSS.write(to: assetsDir.appendingPathComponent("style.css"), atomically: true, encoding: .utf8)
+
+        let year = Calendar(identifier: .gregorian).component(.year, from: Date())
+        let site: [String: Any] = [
+            "title": HTMLEscape.escape(config.title),
+            "author": HTMLEscape.escape(config.author),
+            "description": HTMLEscape.escape(config.description),
+            "url": HTMLEscape.escape(config.url ?? ""),
+        ]
+        let themeTokens = ThemeCSS.tokens(config.theme ?? SiteTheme())
+        // Header navigation, shared by every template. Empty means no nav is rendered.
+        let nav: [[String: String]] = (config.nav ?? []).map {
+            ["label": HTMLEscape.escape($0.label), "url": HTMLEscape.escape($0.url)]
+        }
+
+        func summary(_ loaded: LoadedPost) -> [String: Any] {
+            let post = loaded.post
+            return [
+                "title": HTMLEscape.escape(post.title),
+                "slug": HTMLEscape.escape(post.slug),
+                "url": HTMLEscape.escape("\(post.slug).html"),
+                "dateISO": DateFormat.isoString(post.date),
+                "dateDisplay": DateFormat.displayString(post.date),
+                "tags": HTMLEscape.escape(post.tags),
+                "draft": post.draft,
+                "excerpt": HTMLEscape.escape(renderer.excerpt(loaded.body)),
+            ]
+        }
+
+        // Post pages, and summaries for the index.
+        var summaries: [[String: Any]] = []
+        for loaded in visible {
+            let post = loaded.post
+            let pageURL = "\(post.slug).html"
+            let tagLinks = post.tags.map {
+                ["name": HTMLEscape.escape($0), "url": HTMLEscape.escape("tag-\(PostWriter.slugify($0)).html")]
+            }
+
+            let context: [String: Any] = [
+                "site": site,
+                "theme": themeTokens,
+                "nav": nav,
+                "year": year,
+                "title": HTMLEscape.escape(post.title),
+                "slug": HTMLEscape.escape(post.slug),
+                "url": HTMLEscape.escape(pageURL),
+                "dateISO": DateFormat.isoString(post.date),
+                "dateDisplay": DateFormat.displayString(post.date),
+                "tags": HTMLEscape.escape(post.tags),
+                "tag_links": tagLinks,
+                "draft": post.draft,
+                "content_html": renderer.html(loaded.body),
+            ]
+            let rendered = try render(environment, name: "post.html", context: context)
+            try rendered.write(to: output.appendingPathComponent(pageURL), atomically: true, encoding: .utf8)
+            summaries.append(summary(loaded))
+        }
+
+        // Index.
+        let indexContext: [String: Any] = [
+            "site": site,
+            "theme": themeTokens,
+            "nav": nav,
+            "year": year,
+            "posts": summaries,
+        ]
+        let indexHTML = try render(environment, name: "index.html", context: indexContext)
+        try indexHTML.write(to: output.appendingPathComponent("index.html"), atomically: true, encoding: .utf8)
+
+        // Standalone pages. These are not posts, so they never reach the index, feed, or tags.
+        for loaded in visiblePages {
+            let page = loaded.page
+            let context: [String: Any] = [
+                "site": site,
+                "theme": themeTokens,
+                "nav": nav,
+                "year": year,
+                "title": HTMLEscape.escape(page.title),
+                "slug": HTMLEscape.escape(page.slug),
+                "draft": page.draft,
+                "content_html": renderer.html(loaded.body),
+            ]
+            let rendered = try render(environment, name: "page.html", context: context)
+            try rendered.write(
+                to: output.appendingPathComponent("\(page.slug).html"),
+                atomically: true,
+                encoding: .utf8
+            )
+        }
+
+        // Tag pages (published posts only), one per unique tag, in first-seen order.
+        var tagOrder: [String] = []
+        var tagsBySlug: [String: (name: String, posts: [LoadedPost])] = [:]
+        for loaded in published {
+            for tag in loaded.post.tags {
+                let slug = PostWriter.slugify(tag)
+                if tagsBySlug[slug] == nil {
+                    tagsBySlug[slug] = (name: tag, posts: [])
+                    tagOrder.append(slug)
+                }
+                if tagsBySlug[slug]?.posts.contains(where: { $0.sourceURL == loaded.sourceURL }) == false {
+                    tagsBySlug[slug]?.posts.append(loaded)
+                }
+            }
+        }
+        for slug in tagOrder {
+            guard let entry = tagsBySlug[slug] else { continue }
+            let context: [String: Any] = [
+                "site": site,
+                "theme": themeTokens,
+                "nav": nav,
+                "year": year,
+                "tag": HTMLEscape.escape(entry.name),
+                "posts": entry.posts.map(summary),
+            ]
+            let rendered = try render(environment, name: "tag.html", context: context)
+            try rendered.write(to: output.appendingPathComponent("tag-\(slug).html"), atomically: true, encoding: .utf8)
+        }
+
+        // Feed and sitemap (published posts only).
+        let feed = RSSFeed.xml(config: config, posts: published, renderer: renderer)
+        try feed.write(to: output.appendingPathComponent("feed.xml"), atomically: true, encoding: .utf8)
+        let sitemap = Sitemap.xml(config: config, posts: published)
+        try sitemap.write(to: output.appendingPathComponent("sitemap.xml"), atomically: true, encoding: .utf8)
+
+        return BuildSummary(postCount: visible.count, outputURL: output)
+    }
+
+    private func render(_ environment: Environment, name: String, context: [String: Any]) throws -> String {
+        do {
+            return try environment.renderTemplate(name: name, context: context)
+        } catch {
+            throw OverprintError.templateError("\(name): \(error)")
+        }
+    }
+}

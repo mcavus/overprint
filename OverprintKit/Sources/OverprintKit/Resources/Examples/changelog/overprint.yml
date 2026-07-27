@@ -1,0 +1,12 @@
+title: Release Notes
+author: Dagny Halvorsen
+description: Release notes for shard, a small command line tool for splitting and reassembling large text files.
+url: https://shard.example.com
+theme:
+  mode: dark
+  accent: "#F5A623"
+  font: mono
+nav:
+  - { label: Releases, url: index.html }
+  - { label: Releases tag, url: tag-release.html }
+  - { label: About, url: about.html }
