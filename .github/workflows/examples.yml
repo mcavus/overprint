@@ -17,7 +17,8 @@ on:
       - "OverprintKit/Sources/OverprintKit/Resources/Theme/**"
       - "OverprintKit/Sources/OverprintKit/Engine/**"
       - ".github/workflows/examples.yml"
-      - ".github/examples-index.html"
+      - ".github/landing.html"
+      - "docs/**"
   workflow_dispatch:
 
 permissions:
@@ -71,7 +72,12 @@ jobs:
           find "$OUT" -name '*.html' -exec \
             perl -pi -e 's{<head>}{<head>\n<meta name="robots" content="noindex">}' {} +
 
-          cp .github/examples-index.html "$OUT/index.html"
+          # The landing page, with the images the README already uses.
+          cp .github/landing.html "$OUT/index.html"
+          mkdir -p "$OUT/img"
+          cp docs/screenshot-hero.png docs/screenshot-build.png \
+             docs/screenshot-write.png "$OUT/img/"
+          cp overprint-logos/overprint-mark.png "$OUT/img/mark.png"
           # Without this, Pages runs the output through Jekyll.
           touch "$OUT/.nojekyll"
 
@@ -89,6 +95,11 @@ jobs:
               || { echo "$name: 404.html has the wrong <base>" >&2; exit 1; }
           done
           test -f "$OUT/index.html"
+          # The landing page is useless with broken images, and a missing file here is silent.
+          for img in screenshot-hero screenshot-build screenshot-write mark; do
+            test -s "$OUT/img/$img.png" || { echo "missing img/$img.png" >&2; exit 1; }
+          done
+          grep -q "star" "$OUT/index.html" || { echo "landing page lost its content" >&2; exit 1; }
 
       - name: Publish to gh-pages
         env:

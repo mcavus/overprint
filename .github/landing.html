@@ -1,0 +1,369 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Overprint — a native macOS blogging app you can talk to</title>
+<meta name="description" content="Chat with Claude to build your blog, write in Markdown with AI in the editor, and publish free on GitHub Pages. Free and open source, for macOS.">
+<meta property="og:title" content="Overprint">
+<meta property="og:description" content="A native macOS blogging app you can talk to. Free and open source.">
+<meta property="og:image" content="img/screenshot-hero.png">
+<meta property="og:type" content="website">
+<link rel="icon" href="img/mark.png">
+<style>
+  /* Light by default, matching the app's own chrome. Dark follows the reader's system. */
+  :root {
+    --bg: #FFFFFF;
+    --panel: #FBFBFC;
+    --panel-2: #F6F6F7;
+    --line: #E6E6EA;
+    --line-soft: #ECECEF;
+    --ink: #1D1D1F;
+    --mute: #6B6B70;
+    --faint: #8A8A90;
+    --accent: #0A7AFF;
+    --glow: rgba(10,122,255,.10);
+    --shadow: rgba(15,15,20,.10);
+    --wrap: 1120px;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #08080A;
+      --panel: #101013;
+      --panel-2: #16161A;
+      --line: #232329;
+      --line-soft: #1B1B20;
+      --ink: #F4F4F6;
+      --mute: #9C9CA6;
+      --faint: #6E6E78;
+      --accent: #3B9BFF;
+      --glow: rgba(59,155,255,.13);
+      --shadow: rgba(0,0,0,.85);
+    }
+  }
+  * { box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+  body {
+    margin: 0; background: var(--bg); color: var(--ink);
+    font: 16px/1.65 -apple-system, BlinkMacSystemFont, "Segoe UI", Inter, Helvetica, Arial, sans-serif;
+    -webkit-font-smoothing: antialiased;
+  }
+  a { color: inherit; }
+  .wrap { max-width: var(--wrap); margin: 0 auto; padding: 0 24px; }
+
+  header {
+    position: sticky; top: 0; z-index: 20;
+    background: color-mix(in srgb, var(--bg) 80%, transparent);
+    backdrop-filter: saturate(150%) blur(12px);
+    border-bottom: 1px solid var(--line-soft);
+  }
+  .bar { display: flex; align-items: center; gap: 10px; height: 60px; }
+  .bar .home { display: inline-flex; align-items: center; gap: 9px; text-decoration: none; }
+  .bar .mark { width: 23px; height: 23px; }
+  /* The wordmark is lowercase, as in the lockup. */
+  .bar .name { font-weight: 700; letter-spacing: -.022em; font-size: 17px; color: var(--ink); }
+  .bar nav { margin-left: auto; display: flex; gap: 20px; align-items: center; }
+  .bar nav a { color: var(--mute); text-decoration: none; font-size: 14px; }
+  .bar nav a:hover { color: var(--ink); }
+  .ghost {
+    border: 1px solid var(--line); border-radius: 8px;
+    padding: 6px 12px; font-size: 13.5px; color: var(--ink) !important;
+    display: inline-flex; align-items: center; gap: 6px;
+  }
+  .ghost:hover { border-color: var(--faint); background: var(--panel); }
+
+  /* Hero */
+  .hero { padding: 76px 0 8px; text-align: center; position: relative; overflow: hidden; }
+  .hero::before {
+    content: ""; position: absolute; inset: -46% 0 auto 0; height: 640px;
+    background: radial-gradient(closest-side, var(--glow), transparent 70%);
+    pointer-events: none;
+  }
+  .hero .bigmark { width: 78px; height: 78px; margin: 0 auto 26px; display: block; }
+  .pill {
+    /* No flex gap here: the bare text between <b> and <a> becomes its own flex item, so a gap
+       lands on both sides of "and" and the phrase falls apart. */
+    display: inline-block;
+    border: 1px solid var(--line); border-radius: 999px;
+    padding: 5px 14px; font-size: 13px; color: var(--mute);
+    margin: 0 0 16px; background: var(--panel);
+  }
+  .pill b { color: var(--ink); font-weight: 600; }
+  .pill a { color: var(--accent); text-decoration: none; font-weight: 600; }
+  .pill a:hover { text-decoration: underline; }
+  h1 {
+    font-size: clamp(38px, 6.2vw, 66px);
+    line-height: 1.05; letter-spacing: -.035em; font-weight: 700;
+    margin: 0 0 20px; max-width: 16ch; margin-inline: auto;
+  }
+  h1 em { font-style: normal; color: var(--faint); }
+  .lede {
+    font-size: clamp(16.5px, 2vw, 19px); color: var(--mute);
+    max-width: 58ch; margin: 0 auto 26px; line-height: 1.6;
+  }
+  .cta { display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; }
+  .btn {
+    display: inline-flex; align-items: center; gap: 8px;
+    border-radius: 9px; padding: 11px 18px;
+    font-size: 14.5px; font-weight: 600; text-decoration: none;
+    background: var(--ink); color: var(--bg); border: 1px solid var(--ink);
+  }
+  .btn:hover { opacity: .88; }
+  .btn.alt { background: var(--panel); color: var(--ink); border-color: var(--line); }
+  .btn.alt:hover { border-color: var(--faint); opacity: 1; }
+  .ask {
+    margin: 18px auto 0; max-width: 54ch;
+    font-size: 14.5px; color: var(--mute); line-height: 1.6;
+  }
+  .ask a { color: var(--accent); text-decoration: none; font-weight: 600; }
+  .ask a:hover { text-decoration: underline; }
+  .term {
+    display: inline-flex; align-items: center; gap: 10px; margin-top: 22px;
+    font: 13.5px/1 ui-monospace, SFMono-Regular, "SF Mono", Menlo, monospace;
+    background: var(--panel); border: 1px solid var(--line);
+    border-radius: 9px; padding: 11px 15px; color: var(--mute);
+    max-width: 100%; overflow-x: auto; white-space: nowrap;
+    -webkit-overflow-scrolling: touch;
+  }
+  .term span { color: var(--faint); }
+
+  .shot { margin: 44px auto 0; max-width: 1060px; padding: 0 24px; }
+  .shot img {
+    width: 100%; height: auto; display: block;
+    border-radius: 12px; border: 1px solid var(--line);
+    box-shadow: 0 40px 90px -34px var(--shadow);
+  }
+
+  section { padding: 92px 0; border-top: 1px solid var(--line-soft); }
+  .eyebrow {
+    font: 600 12px/1 ui-monospace, SFMono-Regular, Menlo, monospace;
+    letter-spacing: .14em; text-transform: uppercase; color: var(--accent); margin-bottom: 14px;
+  }
+  h2 {
+    font-size: clamp(27px, 3.4vw, 38px); letter-spacing: -.028em;
+    line-height: 1.14; margin: 0 0 16px; font-weight: 700;
+  }
+  .sub { color: var(--mute); max-width: 60ch; margin: 0 0 18px; font-size: 16.5px; }
+  .sub:last-child { margin-bottom: 0; }
+  .note { color: var(--faint); font-size: 14.5px; max-width: 58ch; margin: 0; }
+
+  .lead { max-width: 64ch; }
+  .wide {
+    width: 100%; height: auto; display: block; margin-top: 38px;
+    border-radius: 12px; border: 1px solid var(--line);
+    box-shadow: 0 34px 80px -34px var(--shadow);
+  }
+
+  .says { margin: 0 0 18px; padding: 0; list-style: none; }
+  .says li {
+    color: var(--ink); font-size: 15.5px; padding: 9px 0 9px 16px;
+    border-left: 2px solid var(--line); margin-bottom: 2px;
+  }
+  .says li em { font-style: normal; color: var(--faint); }
+
+  .grid { display: grid; gap: 18px; grid-template-columns: repeat(3, 1fr); }
+  .card {
+    border: 1px solid var(--line); border-radius: 13px;
+    background: var(--panel); padding: 24px;
+  }
+  .card h3 { margin: 0 0 8px; font-size: 17px; letter-spacing: -.014em; }
+  .card p { margin: 0; color: var(--mute); font-size: 14.5px; line-height: 1.6; }
+
+  .ex { display: grid; gap: 16px; grid-template-columns: repeat(3, 1fr); }
+  .ex a {
+    border: 1px solid var(--line); border-radius: 13px; background: var(--panel);
+    padding: 22px; text-decoration: none; display: block;
+  }
+  .ex a:hover { border-color: var(--faint); background: var(--panel-2); }
+  .ex .name { font-weight: 650; font-size: 16px; margin-bottom: 6px; }
+  .ex .what { color: var(--mute); font-size: 14px; line-height: 1.55; }
+  .ex .go { color: var(--accent); font-size: 13.5px; margin-top: 14px; }
+
+  .star {
+    border: 1px solid var(--line); border-radius: 16px;
+    background: radial-gradient(120% 140% at 50% 0%, var(--glow), transparent 62%), var(--panel);
+    padding: 44px 34px; text-align: center;
+  }
+  .star h2 { margin-bottom: 12px; }
+  .star p { color: var(--mute); max-width: 56ch; margin: 0 auto 24px; }
+
+  footer {
+    border-top: 1px solid var(--line-soft); padding: 36px 0 64px;
+    color: var(--faint); font-size: 14px;
+  }
+  .foot { display: flex; gap: 18px; flex-wrap: wrap; align-items: center; }
+  .foot a { color: var(--mute); text-decoration: none; }
+  .foot a:hover { color: var(--ink); }
+  .foot .right { margin-left: auto; }
+
+  @media (max-width: 860px) {
+    .grid, .ex { grid-template-columns: 1fr; }
+    .wide { margin-top: 26px; }
+    .hero { padding-top: 54px; }
+    section { padding: 64px 0; }
+    .bar nav a:not(.ghost) { display: none; }
+    .term { font-size: 12px; padding: 10px 12px; }
+    .star { padding: 32px 20px; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="wrap bar">
+    <a class="home" href="#">
+      <img class="mark" src="img/mark.png" alt="">
+      <span class="name">overprint</span>
+    </a>
+    <nav>
+      <a href="#build">Build</a>
+      <a href="#write">Write</a>
+      <a href="#examples">Examples</a>
+      <a class="ghost" href="https://github.com/mcavus/overprint">★ Star on GitHub</a>
+    </nav>
+  </div>
+</header>
+
+<div class="hero">
+  <div class="wrap">
+    <img class="bigmark" src="img/mark.png" alt="overprint">
+    <h1>A native macOS blogging app <em>you can talk to</em></h1>
+    <p class="lede">
+      Chat with Claude to build your site. Write in Markdown with AI in the editor.
+      Publish free on GitHub Pages, on a domain you own.
+    </p>
+    <div class="pill"><b>Free</b> and <a href="https://github.com/mcavus/overprint">open source</a></div>
+    <div class="cta">
+      <a class="btn" href="https://github.com/mcavus/overprint">Get Overprint</a>
+      <a class="btn alt" href="https://github.com/mcavus/overprint">★ Star on GitHub</a>
+    </div>
+    <p class="ask">
+      Overprint is free, and it stays free. If it turns out to be useful to you,
+      <a href="https://github.com/mcavus/overprint">a star</a> is the one thing I ask for. It takes
+      a second, and it is how anyone else ever finds this.
+    </p>
+    <div class="term"><span>$</span> git clone https://github.com/mcavus/overprint.git</div>
+  </div>
+  <div class="shot">
+    <img src="img/screenshot-hero.png" alt="Overprint with a post open: the posts list, the Markdown editor, and a live preview">
+  </div>
+</div>
+
+<section id="build">
+  <div class="wrap">
+    <div class="lead">
+      <div class="eyebrow">Build mode</div>
+      <h2>A chat that builds your blog</h2>
+      <p class="sub">
+        Talk to Claude in a thread beside your site, and watch the preview change as it works. It
+        edits the real Markdown and the real config, in your folder, the way you would.
+      </p>
+      <ul class="says">
+        <li>“A minimal personal blog with a dark editorial theme” <em>— scaffolds the whole site</em></li>
+        <li>“Make the accent a warm terracotta” <em>— re-themes it</em></li>
+        <li>“Add an about page” · “Rewrite my last post” <em>— just happens</em></li>
+      </ul>
+      <p class="note">
+        Every turn commits to git before it touches anything, so nothing it does is permanent.
+      </p>
+    </div>
+    <img class="wide" src="img/screenshot-build.png" alt="Build mode: a chat asking for a warm terracotta accent and a soft cream background, applied and visible in the live preview">
+  </div>
+</section>
+
+<section id="write">
+  <div class="wrap">
+    <div class="lead">
+      <div class="eyebrow">Write mode</div>
+      <h2>A Markdown file with Claude in it</h2>
+      <p class="sub">
+        A plain editor beside a live preview of the real page. No blocks, no fields, no CMS. Just
+        the file you would have written anyway.
+      </p>
+      <p class="sub">
+        When a paragraph is not working, <b>Ask Claude</b> is right there: tighten the introduction,
+        fix the grammar, add a conclusion, or say it in your own words. It rewrites the body in
+        place and leaves your frontmatter alone.
+      </p>
+      <p class="note">
+        Drafts sit in the list with everything else and stay out of your feed until you say so.
+      </p>
+    </div>
+    <img class="wide" src="img/screenshot-write.png" alt="Write mode with the Ask Claude popover open over the current draft">
+  </div>
+</section>
+
+<section>
+  <div class="wrap">
+    <div class="grid">
+      <div class="card">
+        <h3>No API key, no extra bill</h3>
+        <p>Both run through Claude Code on your own machine, on the Claude subscription you already have. Nothing is metered, and no key is stored anywhere.</p>
+      </div>
+      <div class="card">
+        <h3>Hosting that costs nothing</h3>
+        <p>Publish to GitHub Pages in one click. No server, no traffic bill, HTTPS included, and your own domain if you want one.</p>
+      </div>
+      <div class="card">
+        <h3>Files you keep</h3>
+        <p>A folder of Markdown in your own git repository. Edit it in Overprint, in vim, or with a script. It still builds if Overprint goes away.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="examples">
+  <div class="wrap">
+    <div class="eyebrow">Live</div>
+    <h2>Three sites, built with it</h2>
+    <p class="sub" style="margin-bottom:40px">
+      Each one ships inside the app. Open the same folder from the launch window and read the
+      Markdown behind what you are looking at.
+    </p>
+    <div class="ex">
+      <a href="starter/">
+        <div class="name">Field Notes</div>
+        <div class="what">A personal writing blog. Posts, frontmatter, and how drafts behave.</div>
+        <div class="go">Visit →</div>
+      </a>
+      <a href="changelog/">
+        <div class="name">Release Notes</div>
+        <div class="what">A developer changelog. Dark, monospaced, tags and tag pages.</div>
+        <div class="go">Visit →</div>
+      </a>
+      <a href="journal/">
+        <div class="name">Studio Journal</div>
+        <div class="what">A studio journal on cream paper. Theming, pages, and navigation.</div>
+        <div class="go">Visit →</div>
+      </a>
+    </div>
+  </div>
+</section>
+
+<section>
+  <div class="wrap">
+    <div class="star">
+      <h2>Star it, and it finds the next person</h2>
+      <p>
+        Overprint is free and open source, made by one person. Stars are how a project like this
+        gets discovered, and they are the only thing I am asking for.
+      </p>
+      <div class="cta">
+        <a class="btn" href="https://github.com/mcavus/overprint">★ Star on GitHub</a>
+        <a class="btn alt" href="https://github.com/mcavus/overprint">Read the source</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="wrap foot">
+    <a href="https://github.com/mcavus/overprint">GitHub</a>
+    <a href="https://github.com/mcavus/overprint#readme">Docs</a>
+    <a href="https://github.com/mcavus/overprint/blob/main/LICENSE">GPL-3.0</a>
+    <span class="right">Built by <a href="https://mcavus.com">Mark Cavusoglu</a></span>
+  </div>
+</footer>
+
+</body>
+</html>

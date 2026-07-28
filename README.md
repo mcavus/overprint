@@ -23,6 +23,8 @@
 
 ## See it live
 
+**[overprint on the web →](https://mcavus.github.io/overprint/)**
+
 Three sample blogs, built by Overprint and published to GitHub Pages. Each one ships inside the app, so you can open the same folder from the launch window and read the Markdown behind what you are looking at.
 
 | | | |
