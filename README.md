@@ -116,6 +116,27 @@ Signed and notarized builds, published to Releases and updating themselves throu
 3. **Connect** the site to a GitHub repository once, the first time you Deploy.
 4. **Commit** to save your writing, and **Deploy** to publish the built site to GitHub Pages.
 
+## Making it look like yours
+
+The `theme` block in `overprint.yml` covers mode, accent, font and page color. When you need more
+than that, a site can override the built-in theme one file at a time:
+
+```
+theme/
+  templates/head.html    injected last in <head>: fonts, favicons, meta, a pre-paint script
+  templates/*.html       override any built-in template (base, index, post, tag, page, nav, 404)
+  assets/style.css       replace the stylesheet
+  assets/**              anything your CSS points at
+static/                  copied verbatim to the site root: favicons, robots.txt, CNAME
+```
+
+Overrides are per file: anything you leave out falls back to the built-in version, so changing the
+`<head>` does not mean owning the other templates. Most sites only ever need `head.html`.
+
+`overprint validate` reports what a site overrides, rejects a filename it would never render, and
+refuses a vendored `base.html` that has dropped a block the engine depends on. A file in `static/`
+that would overwrite generated output is a build error, not a silent overwrite.
+
 ## Site layout
 
 ```
@@ -127,6 +148,8 @@ my-site/
       2026-07-16-hello.md
     pages/                 # optional standalone pages
       about.md
+  theme/                   # optional template and stylesheet overrides
+  static/                  # optional passthrough files, copied to the site root
   dist/                    # generated output, never edit by hand
 ```
 

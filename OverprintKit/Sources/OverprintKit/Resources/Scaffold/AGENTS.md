@@ -13,6 +13,8 @@ The folder is the single source of truth. There is no database and no hidden sta
 overprint.yml        site config (required, at the root)
 content/posts/       one Markdown file per dated post
 content/pages/       one Markdown file per standalone page (optional)
+theme/               optional template and stylesheet overrides (see Theme overrides)
+static/              optional files copied verbatim to the site root
 dist/                GENERATED output, never hand-edit
 ```
 
@@ -109,13 +111,52 @@ nav:                     # optional header navigation, omit for no nav at all
 ```
 
 Every key is optional and falls back to a default, but `overprint.yml` itself must exist.
-`url` is used for absolute links in the feed and sitemap. The `theme` block is the only styling
-knob: there is no per-site CSS file to edit.
+`url` is used for absolute links in the feed and sitemap. The `theme` block is the quick styling
+knob; for anything it cannot express, see Theme overrides below.
 
 `nav` is a list of `{ label, url }` entries rendered in the site header. Each `url` must be a page
 the build actually produces: `index.html`, a page slug such as `about.html`, or a tag page such as
 `tag-notes.html` for a tag that a PUBLISHED post carries. When `nav` is absent, no navigation
 renders at all.
+
+## Theme overrides
+
+A site may override any part of the built-in theme. Everything here is optional, and every file is
+independent: overriding one does not oblige you to vendor the rest.
+
+```
+theme/
+  templates/         any of: base.html index.html post.html tag.html page.html nav.html 404.html head.html
+  assets/style.css   replaces the built-in stylesheet
+  assets/**          anything else your CSS points at (fonts, background images)
+static/              copied verbatim to the site root (favicons, robots.txt, CNAME, images, JS)
+```
+
+**Reach for `theme/templates/head.html` first.** It is empty by default and is injected last in
+`<head>`, which covers most of what people actually want: web fonts, favicons, social meta, a
+pre-paint theme script. Because it lands last, it wins over the built-in font links and stylesheet,
+and you never take ownership of `base.html`.
+
+Overriding `base.html` is the heavy option, and it makes you responsible for four things the rest of
+the engine depends on. `overprint validate` refuses a `base.html` missing any of them:
+
+- `{% block head_top %}` — the 404 page emits its `<base href>` here.
+- `{% block title %}` and `{% block content %}` — or every page renders identical and empty.
+- `{{ theme.rootStyle }}` — the `:root` block carrying `--accent`, `--paper`, `--display`.
+
+The `theme` block in `overprint.yml` keeps working alongside an override. Those tokens are still
+emitted, so custom CSS can consume them (`color: var(--accent)`) or ignore them entirely.
+
+`theme/assets/**` lands in `dist/assets/`, so a stylesheet can use relative URLs. `static/**` lands
+at the site root. A static file that would overwrite generated output (`index.html`, `feed.xml`,
+`sitemap.xml`, `404.html`, a post's `<slug>.html`, `assets/style.css`) is a build error rather than a
+silent overwrite in either direction.
+
+A file in `theme/templates/` that is not one of the eight names above is an error, so a typo
+announces itself instead of quietly doing nothing. Name your own partials with a leading underscore
+(`_sidebar.html`) and `{% include %}` them yourself.
+
+`dist/` is still deleted and rewritten on every build. Nothing here changes that.
 
 ## Drafts
 

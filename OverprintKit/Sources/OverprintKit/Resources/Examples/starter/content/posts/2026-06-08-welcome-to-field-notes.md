@@ -51,9 +51,9 @@ From the folder, start the local preview:
 overprint serve
 ```
 
-That builds the site into `dist/` and serves it at `http://localhost:4321`. Leave it
-running while you write. Edit a file, save, and the preview updates. For a one-off build
-without the server, `overprint build` does that instead.
+That builds the site into `dist/` and serves it at `http://localhost:4321`. It builds once,
+so restart it after a round of edits. The app watches the folder and reloads its preview as
+you type, which is the nicer way to write. For a build with no server, use `overprint build`.
 
 Never edit anything inside `dist/`. It is generated output, and the next build will
 overwrite it. Your work belongs in `content/`.

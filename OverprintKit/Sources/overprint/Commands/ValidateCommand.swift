@@ -13,7 +13,15 @@ struct ValidateCommand: AsyncParsableCommand {
 
     func run() async throws {
         let siteURL = URL(fileURLWithPath: path, isDirectory: true)
-        let issues = SiteStore(siteURL: siteURL).validate()
+        let store = SiteStore(siteURL: siteURL)
+        let issues = store.validate()
+
+        // Say what the site overrides. An override that silently stops applying, or one you forgot
+        // you made, is hard to spot from the output alone.
+        let overrides = store.themeOverrides()
+        if !overrides.isEmpty {
+            print("Theme overrides: \(overrides.joined(separator: ", "))")
+        }
 
         guard issues.isEmpty else {
             for issue in issues {

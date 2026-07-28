@@ -37,7 +37,7 @@ public struct SiteBuilder {
             throw OverprintError.io("refusing to build into the site root")
         }
 
-        let theme = try Theme.bundled()
+        let theme = try Theme.load(siteURL: siteURL)
         let environment = Environment(loader: DictionaryLoader(templates: theme.templates))
         let renderer = MarkdownRenderer()
         let fileManager = FileManager.default
@@ -48,10 +48,24 @@ public struct SiteBuilder {
         }
         try fileManager.createDirectory(at: output, withIntermediateDirectories: true)
 
-        // Stylesheet.
+        // Every path this build writes, relative to dist/. `static/` is checked against it below
+        // so a passthrough file can never quietly replace generated output, or be replaced by it.
+        var generated: Set<String> = []
+        func record(_ relative: String) { generated.insert(relative) }
+
+        // Stylesheet, plus anything else the site keeps in theme/assets/ for its CSS to reference.
         let assetsDir = output.appendingPathComponent("assets")
         try fileManager.createDirectory(at: assetsDir, withIntermediateDirectories: true)
         try theme.styleCSS.write(to: assetsDir.appendingPathComponent("style.css"), atomically: true, encoding: .utf8)
+        record("assets/style.css")
+        for (relative, source) in theme.extraAssets.sorted(by: { $0.key < $1.key }) {
+            let destination = assetsDir.appendingPathComponent(relative)
+            try fileManager.createDirectory(
+                at: destination.deletingLastPathComponent(), withIntermediateDirectories: true
+            )
+            try fileManager.copyItem(at: source, to: destination)
+            record("assets/\(relative)")
+        }
 
         let year = Calendar(identifier: .gregorian).component(.year, from: Date())
         let site: [String: Any] = [
@@ -106,6 +120,7 @@ public struct SiteBuilder {
             ]
             let rendered = try render(environment, name: "post.html", context: context)
             try rendered.write(to: output.appendingPathComponent(pageURL), atomically: true, encoding: .utf8)
+            record(pageURL)
             summaries.append(summary(loaded))
         }
 
@@ -119,6 +134,7 @@ public struct SiteBuilder {
         ]
         let indexHTML = try render(environment, name: "index.html", context: indexContext)
         try indexHTML.write(to: output.appendingPathComponent("index.html"), atomically: true, encoding: .utf8)
+        record("index.html")
 
         // Standalone pages. These are not posts, so they never reach the index, feed, or tags.
         // A page claiming the `404` slug is the not-found page and is rendered separately below.
@@ -140,6 +156,7 @@ public struct SiteBuilder {
                 atomically: true,
                 encoding: .utf8
             )
+            record("\(page.slug).html")
         }
 
         // Tag pages (published posts only), one per unique tag, in first-seen order.
@@ -169,6 +186,7 @@ public struct SiteBuilder {
             ]
             let rendered = try render(environment, name: "tag.html", context: context)
             try rendered.write(to: output.appendingPathComponent("tag-\(slug).html"), atomically: true, encoding: .utf8)
+        record("tag-\(slug).html")
         }
 
         // Not-found page. Written after everything else so it wins if some post or page also
@@ -190,12 +208,17 @@ public struct SiteBuilder {
             atomically: true,
             encoding: .utf8
         )
+        record("404.html")
 
         // Feed and sitemap (published posts only).
         let feed = RSSFeed.xml(config: config, posts: published, renderer: renderer)
         try feed.write(to: output.appendingPathComponent("feed.xml"), atomically: true, encoding: .utf8)
+        record("feed.xml")
         let sitemap = Sitemap.xml(config: config, posts: published)
         try sitemap.write(to: output.appendingPathComponent("sitemap.xml"), atomically: true, encoding: .utf8)
+        record("sitemap.xml")
+
+        try copyStatic(from: siteURL, into: output, avoiding: generated)
 
         return BuildSummary(postCount: visible.count, outputURL: output)
     }
@@ -223,6 +246,32 @@ public struct SiteBuilder {
         let leading = path.hasPrefix("/") ? path : "/" + path
         return leading.hasSuffix("/") ? leading : leading + "/"
     }
+
+    /// Copies `static/` verbatim into `dist/`, for favicons, images, scripts, robots.txt, CNAME.
+    ///
+    /// A file that would land on generated output is an error rather than a silent overwrite in
+    /// either direction: whichever way it resolved, one of the two files the author wrote would
+    /// vanish without a word.
+    private func copyStatic(from siteURL: URL, into output: URL, avoiding generated: Set<String>) throws {
+        let staticDir = siteURL.appendingPathComponent(Self.staticDirName)
+        let fm = FileManager.default
+
+        for (relative, url) in Theme.regularFiles(under: staticDir).sorted(by: { $0.key < $1.key }) {
+            if generated.contains(relative) {
+                throw OverprintError.io(
+                    "\(Self.staticDirName)/\(relative) collides with generated output. Overprint "
+                    + "writes \(relative) itself, so rename or remove this file."
+                )
+            }
+            let destination = output.appendingPathComponent(relative)
+            try fm.createDirectory(
+                at: destination.deletingLastPathComponent(), withIntermediateDirectories: true
+            )
+            try fm.copyItem(at: url, to: destination)
+        }
+    }
+
+    static let staticDirName = "static"
 
     private func render(_ environment: Environment, name: String, context: [String: Any]) throws -> String {
         do {

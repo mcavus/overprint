@@ -82,7 +82,11 @@ final class AppModel: ObservableObject {
         buildModel = build
 
         watcher?.stop()
-        let newWatcher = FileWatcher(paths: [url.appendingPathComponent("content")]) { [weak write, weak build] in
+        // Theme and static changes alter the built site exactly as content changes do, so the
+        // preview has to reload for them too. dist/ is deliberately NOT watched: the build writes
+        // it, which would retrigger the build.
+        let watched = ["content", "theme", "static"].map(url.appendingPathComponent)
+        let newWatcher = FileWatcher(paths: watched) { [weak write, weak build] in
             DispatchQueue.main.async {
                 write?.externalChange()
                 build?.bumpPreview()

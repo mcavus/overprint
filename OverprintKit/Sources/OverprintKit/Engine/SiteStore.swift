@@ -54,9 +54,41 @@ public struct SiteStore {
         return pages
     }
 
-    /// A non-throwing validation pass that returns every issue found (config + all posts).
+    /// Files this site overrides from the bundled theme, for `overprint validate` to report.
+    /// Empty when the site uses the bundled theme as-is.
+    public func themeOverrides() -> [String] {
+        ((try? Theme.load(siteURL: siteURL))?.overriddenNames) ?? []
+    }
+
+    /// Checks the site's `theme/` directory: unknown template names, and whether a vendored
+    /// `base.html` still carries the blocks the rest of the engine depends on.
+    func themeErrors() -> [OverprintError] {
+        var errors: [OverprintError] = []
+        let templatesDir = siteURL.appendingPathComponent("theme/templates")
+        let names = (try? FileManager.default.contentsOfDirectory(atPath: templatesDir.path)) ?? []
+
+        for name in names.sorted() where !name.hasPrefix(".") {
+            if let issue = Theme.templateNameIssue(name) {
+                errors.append(issue)
+                continue
+            }
+            guard name == "base.html",
+                  let body = try? String(contentsOf: templatesDir.appendingPathComponent(name), encoding: .utf8)
+            else { continue }
+            for requirement in Theme.baseRequirements where !body.contains(requirement.needle) {
+                errors.append(.templateError(
+                    "theme/templates/base.html is missing \(requirement.needle): \(requirement.why)."
+                ))
+            }
+        }
+        return errors
+    }
+
+    /// A non-throwing validation pass that returns every issue found: the theme overrides, the
+    /// config, and every post and page.
     public func validate() -> [OverprintError] {
         var errors: [OverprintError] = []
+        errors.append(contentsOf: themeErrors())
         do {
             _ = try loadConfig()
         } catch let error as OverprintError {
