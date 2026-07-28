@@ -13,10 +13,17 @@ public struct BuildSummary: Equatable, Sendable {
 public struct SiteBuilder {
     public init() {}
 
-    /// Builds the site. `includeDrafts` keeps `draft: true` posts in the pages and index (for
-    /// local preview); the RSS feed, sitemap, and tag pages always exclude drafts.
+    /// Builds the site into `dist/`.
+    ///
+    /// `includeDrafts` keeps `draft: true` posts in the pages and index; the RSS feed, sitemap, and
+    /// tag pages exclude drafts either way.
+    ///
+    /// It defaults to FALSE, so output is publishable unless a caller opts in. It used to default to
+    /// true, which meant a forgotten argument published the author's unfinished writing: a draft got
+    /// its own page and a link from the index while staying out of the feed and the sitemap, so
+    /// nothing you would think to check showed it. Only preview callers should pass true.
     @discardableResult
-    public func build(siteURL: URL, outputURL: URL? = nil, includeDrafts: Bool = true) throws -> BuildSummary {
+    public func build(siteURL: URL, outputURL: URL? = nil, includeDrafts: Bool = false) throws -> BuildSummary {
         let store = SiteStore(siteURL: siteURL)
         let config = try store.loadConfig()
         let allPosts = try store.loadPosts()

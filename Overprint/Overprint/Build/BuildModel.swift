@@ -126,7 +126,7 @@ final class BuildModel: ObservableObject {
 
         // 4. Rebuild and reload the preview.
         await step(index, 3) {
-            try SiteBuilder().build(siteURL: self.site)
+            try SiteBuilder().build(siteURL: self.site, includeDrafts: true)
             if !self.serverManager.isServing { self.serverManager.start(dist: self.site.appendingPathComponent("dist")) }
             self.reloadToken += 1
             return "localhost:\(self.serverManager.port)"
@@ -194,7 +194,7 @@ final class BuildModel: ObservableObject {
             return detail
         }
         await step(index, 3) {
-            try SiteBuilder().build(siteURL: self.site)
+            try SiteBuilder().build(siteURL: self.site, includeDrafts: true)
             if !self.serverManager.isServing { self.serverManager.start(dist: self.site.appendingPathComponent("dist")) }
             self.reloadToken += 1
             return "localhost:\(self.serverManager.port)"

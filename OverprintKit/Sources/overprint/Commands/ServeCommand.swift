@@ -16,7 +16,8 @@ struct ServeCommand: AsyncParsableCommand {
 
     func run() async throws {
         let siteURL = URL(fileURLWithPath: path, isDirectory: true)
-        let summary = try SiteBuilder().build(siteURL: siteURL)
+        // Preview is for the author, so it shows drafts.
+        let summary = try SiteBuilder().build(siteURL: siteURL, includeDrafts: true)
 
         let server = PreviewServer()
         let boundPort = try server.start(directory: summary.outputURL, port: port)

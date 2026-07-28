@@ -51,12 +51,14 @@ private func makeSite(url: String? = nil) throws -> URL {
     return site
 }
 
-@Test func draftIncludedByDefault() throws {
+/// Preview builds show drafts. This used to be the DEFAULT, which is what let `overprint build`
+/// publish unfinished posts; the flag now has to be asked for.
+@Test func draftIncludedWhenPreviewing() throws {
     let fm = FileManager.default
     let site = try makeSite()
     defer { try? fm.removeItem(at: site) }
     let out = site.appendingPathComponent("out")
-    let summary = try SiteBuilder().build(siteURL: site, outputURL: out)
+    let summary = try SiteBuilder().build(siteURL: site, outputURL: out, includeDrafts: true)
 
     #expect(summary.postCount == 3)
     #expect(fm.fileExists(atPath: out.appendingPathComponent("draft-one.html").path))
@@ -166,4 +168,38 @@ private func makeSite(url: String? = nil) throws -> URL {
     let alpha = try String(contentsOf: out.appendingPathComponent("alpha.html"), encoding: .utf8)
     #expect(alpha.contains("href=\"tag-swift.html\""))
     #expect(alpha.contains("href=\"tag-macos.html\""))
+}
+
+@Test func buildExcludesDraftsByDefaultSoOutputIsPublishable() throws {
+    // Regression: `build` used to default to includeDrafts: true, so `overprint build` wrote a
+    // draft's full text to <slug>.html and linked it from the index, while the feed and sitemap
+    // (the places you would check) stayed clean.
+    let fm = FileManager.default
+    let site = fm.temporaryDirectory.appendingPathComponent("op-dd-\(UUID().uuidString)")
+    try fm.createDirectory(at: site.appendingPathComponent("content/posts"), withIntermediateDirectories: true)
+    defer { try? fm.removeItem(at: site) }
+    try "title: Drafts\nauthor: Ada\n"
+        .write(to: site.appendingPathComponent("overprint.yml"), atomically: true, encoding: .utf8)
+    try """
+    ---
+    title: Unfinished
+    date: 2026-07-20
+    slug: unfinished
+    tags: []
+    draft: true
+    ---
+
+    Please do not publish this sentence.
+    """.write(to: site.appendingPathComponent("content/posts/2026-07-20-unfinished.md"),
+              atomically: true, encoding: .utf8)
+
+    try SiteBuilder().build(siteURL: site)
+    let dist = site.appendingPathComponent("dist")
+    #expect(!FileManager.default.fileExists(atPath: dist.appendingPathComponent("unfinished.html").path))
+    let index = try String(contentsOf: dist.appendingPathComponent("index.html"), encoding: .utf8)
+    #expect(!index.contains("unfinished"))
+
+    // Preview still shows it, which is the whole point of the flag.
+    try SiteBuilder().build(siteURL: site, includeDrafts: true)
+    #expect(FileManager.default.fileExists(atPath: dist.appendingPathComponent("unfinished.html").path))
 }

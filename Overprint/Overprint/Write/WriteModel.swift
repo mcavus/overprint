@@ -168,7 +168,7 @@ final class WriteModel: ObservableObject {
         rebuildWork?.cancel()
         rebuildWork = nil
         do {
-            try SiteBuilder().build(siteURL: site)
+            try SiteBuilder().build(siteURL: site, includeDrafts: true)
             lastError = nil
         } catch {
             lastError = Self.describe(error)
@@ -188,7 +188,7 @@ final class WriteModel: ObservableObject {
 
     func startServing() {
         do {
-            try SiteBuilder().build(siteURL: site)
+            try SiteBuilder().build(siteURL: site, includeDrafts: true)
         } catch {
             NSLog("Overprint: build failed: \(error.localizedDescription)")
         }
