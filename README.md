@@ -23,8 +23,6 @@
 
 ## See it live
 
-**[overprint on the web →](https://mcavus.github.io/overprint/)**
-
 Three sample blogs, built by Overprint and published to GitHub Pages. Each one ships inside the app, so you can open the same folder from the launch window and read the Markdown behind what you are looking at.
 
 | | | |
@@ -34,6 +32,8 @@ Three sample blogs, built by Overprint and published to GitHub Pages. Each one s
 | **[Studio Journal](https://mcavus.github.io/overprint/journal/)** | A studio journal on cream paper | Theming, standalone pages, and navigation |
 
 The writing in them is invented. The sites are real output from the engine the app ships with.
+
+They all live under the [Overprint project page](https://mcavus.github.io/overprint/), which is the short version of this README.
 
 ---
 
