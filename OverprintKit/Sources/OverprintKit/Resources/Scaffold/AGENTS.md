@@ -66,6 +66,29 @@ the RSS feed, or any tag page. Post and page slugs share one namespace: two file
 same slug is a validation error, because each becomes `<slug>.html`. Avoid the reserved names
 `index`, `feed`, `sitemap`, and anything starting with `tag-`, which collide with generated output.
 
+## Not found page
+
+Every build writes `404.html`, which most hosts (GitHub Pages included) serve for an address that
+does not exist. It uses the site's theme and navigation, and it is never listed in the index, the
+feed, or the sitemap.
+
+To replace the wording, add a page whose slug is `404` (usually `content/pages/404.md`):
+
+```yaml
+---
+title: Nothing here
+---
+```
+
+That page is not also emitted as an ordinary page: it becomes `404.html` and nothing else. Write it
+as you would any page. Leave it out and the built-in copy is used.
+
+One thing to know if you edit the template: the host serves this file without redirecting, so the
+browser stays on the address the visitor typed. Relative links would resolve against that address
+rather than the site root, so this page alone carries a `<base>` derived from `url` in
+`overprint.yml`. Removing it breaks the stylesheet and every link for any visitor who lands on a
+path below the root.
+
 ## Site config
 
 `overprint.yml` at the root:

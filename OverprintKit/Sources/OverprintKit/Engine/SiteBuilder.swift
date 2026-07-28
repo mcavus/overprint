@@ -114,7 +114,8 @@ public struct SiteBuilder {
         try indexHTML.write(to: output.appendingPathComponent("index.html"), atomically: true, encoding: .utf8)
 
         // Standalone pages. These are not posts, so they never reach the index, feed, or tags.
-        for loaded in visiblePages {
+        // A page claiming the `404` slug is the not-found page and is rendered separately below.
+        for loaded in visiblePages where loaded.page.slug != Self.notFoundSlug {
             let page = loaded.page
             let context: [String: Any] = [
                 "site": site,
@@ -163,6 +164,26 @@ public struct SiteBuilder {
             try rendered.write(to: output.appendingPathComponent("tag-\(slug).html"), atomically: true, encoding: .utf8)
         }
 
+        // Not-found page. Written after everything else so it wins if some post or page also
+        // claimed the slug. It is deliberately absent from the index, the feed, and the sitemap:
+        // it is a response to a wrong address, not a document anyone should be pointed at.
+        let notFoundPage = visiblePages.first { $0.page.slug == Self.notFoundSlug }
+        let notFoundContext: [String: Any] = [
+            "site": site,
+            "theme": themeTokens,
+            "nav": nav,
+            "year": year,
+            "base_path": HTMLEscape.escape(Self.basePath(from: config.url)),
+            "title": HTMLEscape.escape(notFoundPage?.page.title ?? "Page not found"),
+            "content_html": notFoundPage.map { renderer.html($0.body) } ?? Self.defaultNotFoundHTML,
+        ]
+        let notFoundHTML = try render(environment, name: "404.html", context: notFoundContext)
+        try notFoundHTML.write(
+            to: output.appendingPathComponent("404.html"),
+            atomically: true,
+            encoding: .utf8
+        )
+
         // Feed and sitemap (published posts only).
         let feed = RSSFeed.xml(config: config, posts: published, renderer: renderer)
         try feed.write(to: output.appendingPathComponent("feed.xml"), atomically: true, encoding: .utf8)
@@ -170,6 +191,30 @@ public struct SiteBuilder {
         try sitemap.write(to: output.appendingPathComponent("sitemap.xml"), atomically: true, encoding: .utf8)
 
         return BuildSummary(postCount: visible.count, outputURL: output)
+    }
+
+    /// A page with this slug replaces the built-in not-found copy.
+    static let notFoundSlug = "404"
+
+    static let defaultNotFoundHTML =
+        "<p>That page does not exist, or it has moved. <a href=\"index.html\">Go to the front page</a>.</p>"
+
+    /// The directory the site is published under, for the not-found page's `<base href>`.
+    ///
+    /// A host answers a missing path with `404.html` without redirecting, so the browser stays on
+    /// something like `/notes/typo` and every relative link in the shared templates would resolve
+    /// against `/notes/` instead of the site root: no stylesheet, no working navigation. A `<base>`
+    /// fixes that, but `/` is only correct for a custom domain or a user page. A GitHub Pages
+    /// project site lives under `/<repo>/`, so the prefix comes from the configured `url`.
+    ///
+    /// Returns a path with both a leading and a trailing slash, or `/` when there is nothing to go on.
+    static func basePath(from url: String?) -> String {
+        guard let url, !url.isEmpty,
+              let path = URLComponents(string: url)?.path,
+              !path.isEmpty, path != "/"
+        else { return "/" }
+        let leading = path.hasPrefix("/") ? path : "/" + path
+        return leading.hasSuffix("/") ? leading : leading + "/"
     }
 
     private func render(_ environment: Environment, name: String, context: [String: Any]) throws -> String {

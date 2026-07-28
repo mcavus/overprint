@@ -1,0 +1,19 @@
+{% extends "base.html" %}
+{% block title %}{{ title }} · {{ site.title }}{% endblock %}
+{# The server answers a missing path with this file without redirecting, so the browser stays on
+   the address the visitor typed. Every relative link below would resolve against that address
+   instead of the site root, which is why this page, alone, needs a base. #}
+{% block head_top %}<base href="{{ base_path }}">{% endblock %}
+{% block content %}
+<header class="site-header">
+  <div class="site-header-row">
+    <h1 class="site-title"><a href="index.html">{{ site.title }}</a></h1>
+    {% include "nav.html" %}
+  </div>
+</header>
+<hr class="rule">
+<article class="post">
+  <h1 class="post-title">{{ title }}</h1>
+  {{ content_html }}
+</article>
+{% endblock %}

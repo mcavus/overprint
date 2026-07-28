@@ -26,6 +26,7 @@ struct Theme {
         let tag = try read(templatesDir.appendingPathComponent("tag.html"))
         let page = try read(templatesDir.appendingPathComponent("page.html"))
         let nav = try read(templatesDir.appendingPathComponent("nav.html"))
+        let notFound = try read(templatesDir.appendingPathComponent("404.html"))
         let css = try read(themeRoot.appendingPathComponent("assets/style.css"))
 
         return Theme(
@@ -36,6 +37,7 @@ struct Theme {
                 "tag.html": tag,
                 "page.html": page,
                 "nav.html": nav,
+                "404.html": notFound,
             ],
             styleCSS: css
         )
