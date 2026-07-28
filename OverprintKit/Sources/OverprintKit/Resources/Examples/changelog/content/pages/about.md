@@ -4,7 +4,7 @@ title: About
 
 **shard** is a small command line tool for splitting large text files into addressable chunks and putting them back together again without losing a byte. It started as a fifty line script for chopping up database dumps that were too big to move over a flaky connection, and it grew into something a few thousand people now depend on.
 
-It does three things. It splits a file on a boundary you choose (line count, byte size, or a regular expression). It writes a manifest that records the order, the sizes, and a checksum for every piece. It reassembles the pieces from that manifest and tells you loudly if anything is missing or corrupt.
+It splits a file on a boundary you choose (line count, byte size, or a regular expression), records what it did in a manifest with a checksum for every piece, and puts the pieces back from that manifest, complaining loudly if anything is missing or corrupt.
 
 Nothing beyond that. shard will not compress your files, encrypt them, upload them, or watch a directory for changes. Other tools do those jobs well and I would rather compose with them than reimplement them badly.
 

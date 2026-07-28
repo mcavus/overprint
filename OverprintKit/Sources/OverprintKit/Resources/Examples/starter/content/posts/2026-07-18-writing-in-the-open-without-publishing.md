@@ -9,27 +9,27 @@ draft: false
 Most of what I write never becomes a post. It sits half finished for a week, gets a
 better opening paragraph, loses two paragraphs in the middle, and either turns into
 something or quietly stops. I want all of that in the same folder as the finished work,
-not in a separate scratch file I forget about.
+not in a separate scratch file I'll forget about.
 
-That is what the `draft` field is for.
+That's what the `draft` field is for.
 
 ## What draft: true actually does
 
 Set `draft: true` in a post's frontmatter and it disappears from everything the public
 sees:
 
-- It is left out of the post list on the home page.
-- It is left out of the RSS feed, so subscribers never see a half thought.
-- It is left out of the sitemap, so search engines are not told it exists.
-- It is left out of every tag page, even if it carries tags.
+- The post list on the home page skips it.
+- It stays out of the RSS feed, so subscribers never see a half thought.
+- Search engines aren't told it exists, because it never reaches the sitemap.
+- Tag pages ignore it, even when it carries tags.
 
-What it does not do is hide the post from you. In local preview, drafts are built and
+What it doesn't do is hide the post from you. In local preview, drafts are built and
 served like any other post, so you can read the thing in its final typography and notice
 that the third paragraph is doing nothing. In the Overprint sidebar, drafts sit in the
 same list as published posts, marked with a hollow dot and a small tag. In your text
-editor, it is just a file.
+editor it's just a file.
 
-The rule is simple: `overprint serve` includes drafts, and building for deploy does not.
+So: `overprint serve` includes drafts, and `overprint build` doesn't.
 
 ## Why not just keep a scratch folder
 
@@ -38,7 +38,7 @@ moving it into the site is a decision, and decisions are easy to defer. If it li
 the same list as everything else, finishing it is a one word change.
 
 It also keeps you honest about how much is in flight. Open the sidebar, count the hollow
-dots, and you know whether you have three things half done or eleven.
+dots, and you know whether you've got three things half done or eleven.
 
 ## Publishing
 
@@ -50,7 +50,7 @@ draft: false
 
 Save, and the post joins the list. Nothing else moves. The filename stays the same, the
 slug stays the same, the address it will have on the web is the address it already had
-in preview. There is no separate publish step, no queue, no staging copy.
+in preview. There's no separate publish step and nothing to stage.
 
 One thing worth thinking about is the date. A draft you started three weeks ago still
 carries the date you created it, so it will land partway down the list where nobody

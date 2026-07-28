@@ -6,9 +6,9 @@ slug: welcome-to-field-notes
 draft: false
 ---
 
-This is the first entry in Field Notes, a small blog I keep about writing. It is also
-the starting point of the Overprint tutorial, so it explains the one idea everything
-else rests on.
+This is the first entry in Field Notes, a small blog I keep about writing. It's also the
+starting point of the Overprint tutorial, so it explains the one idea everything else
+rests on.
 
 ## The folder is the site
 
@@ -23,29 +23,25 @@ content/
     about.md
 ```
 
-That is it. `overprint.yml` holds the title, the author, the theme, and the navigation.
+That's it. `overprint.yml` holds the title, the author, the theme, and the navigation.
 Everything under `content/posts` becomes an entry in the list you are reading. Everything
 under `content/pages` becomes a standalone page like About.
 
-There is no database behind this. There is no hidden app state, no sync service, no
-export button you have to remember to press. The files on disk are the site. If a file
-is there, it gets built. If you delete it, it stops existing. If you rename it, the
-site changes.
+The files on disk are the site. There's no database, and no copy of your writing living
+somewhere you can't see. If a file is there, it gets built. Delete it and it stops
+existing.
 
 ## Why that matters
 
-Two reasons, and both of them are about not losing your work.
-
-The first is that you are never locked in. These are plain Markdown files with a few
+Because you can't lose work you can still open. These are plain Markdown files with a few
 lines of YAML at the top. You can open them in Overprint, in a text editor, in a
 terminal, on a different machine ten years from now. Put the folder in a git repository
 and you get version history for free. Put it in a synced folder and you can write on
 either computer.
 
-The second is that anything can edit them. Overprint is a comfortable place to write,
-but it is not the only door into this folder. A script can add a post. A command line
-tool can rename a file. You are not asking permission from an app to touch your own
-prose.
+And anything can edit them. Overprint is a comfortable place to write, but it isn't the
+only door into this folder. A script can add a post; so can you, in whatever editor you
+already have open. You're not asking an app for permission to touch your own prose.
 
 ## Running this site
 
@@ -56,8 +52,8 @@ overprint serve
 ```
 
 That builds the site into `dist/` and serves it at `http://localhost:4321`. Leave it
-running while you write. Edit a file, save, and the preview updates. If you want a
-one-off build without the server, `overprint build` does that instead.
+running while you write. Edit a file, save, and the preview updates. For a one-off build
+without the server, `overprint build` does that instead.
 
 Never edit anything inside `dist/`. It is generated output, and the next build will
 overwrite it. Your work belongs in `content/`.

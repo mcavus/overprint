@@ -15,5 +15,5 @@ right under shop lights and wrong at home, the long stretch in the middle of a b
 is interesting enough to post but everything is being decided. I try to write the entries close to
 the moment, before I have smoothed the story out.
 
-There is no comment section. If you want to talk about something here, write to me, and I will
-probably write back slowly.
+Most of what I make leaves the shop and I never see it again. The journal is the part I get to
+keep.

@@ -21,25 +21,26 @@ draft: false
 ---
 ```
 
-Five fields. No more, no fewer. Below the closing hyphens, everything is ordinary
-Markdown.
+Below the closing hyphens, everything is ordinary Markdown. The block above is the whole
+of the structured part, and these are the five fields in it.
 
 ## title
 
 The headline. It appears at the top of the post, in the list on the home page, in the
-browser tab, and in the RSS feed. Write it as a sentence, not as a headline in title
-case, unless you prefer otherwise. Quote it if it contains a colon, because YAML reads
-a bare colon as a separator.
+browser tab, and in the RSS feed. Write it as a sentence rather than in title case, unless
+you prefer otherwise. Quote it if it contains a colon, because YAML reads a bare colon as
+a separator.
 
 ## date
 
 The publication date in `YYYY-MM-DD` form. Posts are sorted newest first, so this is
 what decides the order of the list. It is also what shows under each entry.
 
-The date does double duty: it is the first part of the filename. This post lives at
+The date does double duty: it's also the first part of the filename. This post lives at
 `content/posts/2026-06-27-the-five-fields-at-the-top-of-every-post.md`, and the date in
-the filename must match the date in the frontmatter. Overprint keeps them in sync when
-you change the date from the app. If you edit the file by hand, change both.
+the filename has to match the date in the frontmatter. Nothing keeps them in step for
+you, so if you change one, change the other. `overprint validate` will tell you if you
+forget.
 
 ## tags
 
@@ -63,19 +64,19 @@ changes its address and breaks every link to it, so pick one you can live with.
 
 ## draft
 
-Either `true` or `false`. A post with `draft: true` is kept out of the built site. It is
-still visible while you are previewing locally, so you can see how it looks before anyone
+Either `true` or `false`. A post with `draft: true` is kept out of the built site, but
+you'll still see it while previewing locally, so you can tell how it looks before anyone
 else does. The next post covers this in detail, because it is the field people get wrong
 most often.
 
 ## Checking your work
 
-If you edited a file by hand and want to be sure you did not break anything:
+If you edited a file by hand and want to be sure you didn't break anything:
 
 ```
 overprint validate
 ```
 
 That walks every post, checks the five fields, and tells you about mismatched filenames,
-missing dates, and malformed YAML. Run it before you publish. It takes a second and it
+missing dates, and malformed YAML. Run it before you publish. It takes a second and
 catches the boring mistakes.

@@ -1,4 +1,5 @@
 import Testing
+import Foundation
 @testable import OverprintKit
 
 @Test func parsesValidFrontmatter() throws {
@@ -46,4 +47,41 @@ import Testing
     let raw = "---\ntitle: T\ndate: 2026-01-01\nslug: t\n---\nbody"
     let (post, _) = try FrontmatterParser().parse(raw, filename: "2026-01-01-t.md")
     #expect(post.draft == false)
+}
+
+@Test func validateCatchesAFilenameDateThatDisagreesWithTheField() throws {
+    let fm = FileManager.default
+    let site = fm.temporaryDirectory.appendingPathComponent("op-fd-\(UUID().uuidString)")
+    try fm.createDirectory(at: site.appendingPathComponent("content/posts"), withIntermediateDirectories: true)
+    defer { try? fm.removeItem(at: site) }
+    try "title: Dates\nauthor: Ada\n"
+        .write(to: site.appendingPathComponent("overprint.yml"), atomically: true, encoding: .utf8)
+    // Filename says 2026-06-08, frontmatter says 2020-01-01. This used to validate clean.
+    try """
+    ---
+    title: Mismatched
+    date: 2020-01-01
+    slug: mismatched
+    tags: []
+    draft: false
+    ---
+
+    Body.
+    """.write(to: site.appendingPathComponent("content/posts/2026-06-08-mismatched.md"),
+              atomically: true, encoding: .utf8)
+
+    let issues = SiteStore(siteURL: site).validate()
+    #expect(issues.count == 1)
+    #expect(issues.first?.description.contains("2026-06-08") == true)
+    #expect(issues.first?.description.contains("2020-01-01") == true)
+}
+
+@Test func filenameDateIssueIsQuietWhenItShouldBe() {
+    let date = DateFormat.parse("2026-06-08")!
+    // Agreement.
+    #expect(FrontmatterParser.filenameDateIssue(filename: "2026-06-08-hello.md", date: date) == nil)
+    // No prefix at all is a looser convention question, not an error.
+    #expect(FrontmatterParser.filenameDateIssue(filename: "hello.md", date: date) == nil)
+    // Disagreement.
+    #expect(FrontmatterParser.filenameDateIssue(filename: "2020-01-01-hello.md", date: date) != nil)
 }

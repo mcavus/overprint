@@ -40,12 +40,12 @@ nav:
   - { label: Colophon, url: colophon.html }
 ```
 
-Three links, in the order I want them read. `index.html` is the journal itself. The other two are
-the pages I just wrote. A nav entry can also point at a tag page if you want a section that is
+`index.html` is the journal itself, and the other two are the pages I just wrote, in the order I
+want them read. A nav entry can also point at a tag page if you want a section that is
 really a filter, though I would be careful there, because a nav link to a tag with nothing in it is
 a promise the site cannot keep.
 
 I wrote both pages in an afternoon. The About is short and says where the shop is. The Colophon
-turned out to be the more interesting one, because explaining why the page is cream and why the
-type is a sans forced me to admit that I had reasons, and that they were mostly about not wanting
-this to look finished.
+took longer, because explaining why the page is cream meant admitting I had a reason.
+
+I still have not written back to the woman who emailed.

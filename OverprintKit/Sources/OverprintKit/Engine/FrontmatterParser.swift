@@ -128,6 +128,27 @@ public struct FrontmatterParser {
     }
 
     /// Derives a slug from `YYYY-MM-DD-slug.md` by stripping the date prefix and extension.
+    /// Reports a post filename whose `YYYY-MM-DD-` prefix disagrees with its `date` field.
+    ///
+    /// The two are a documented pair: the prefix is how posts sort on disk and how a human finds a
+    /// post's file, while `date` is what the site publishes. Nothing keeps them in step
+    /// automatically, so a date edited in one place and not the other goes unnoticed until the
+    /// published order looks wrong.
+    ///
+    /// Returns nil when they agree, and also when the filename carries no date prefix at all: that
+    /// is a different (and looser) convention question, and flagging it would fail sites that build
+    /// correctly today.
+    static func filenameDateIssue(filename: String, date: Date) -> String? {
+        guard let range = filename.range(of: #"^\d{4}-\d{2}-\d{2}"#, options: .regularExpression) else {
+            return nil
+        }
+        let fromFilename = String(filename[range])
+        let fromFrontmatter = DateFormat.isoString(date)
+        guard fromFilename != fromFrontmatter else { return nil }
+        return "filename starts with \(fromFilename) but the date field is \(fromFrontmatter); "
+            + "rename the file or change the date so they match"
+    }
+
     static func slug(fromFilename filename: String) -> String {
         var name = filename
         if name.hasSuffix(".md") { name.removeLast(3) }

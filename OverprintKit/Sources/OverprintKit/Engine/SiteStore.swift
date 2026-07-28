@@ -86,6 +86,11 @@ public struct SiteStore {
                 let raw = try String(contentsOf: url, encoding: .utf8)
                 let (post, _) = try parser.parse(raw, filename: url.lastPathComponent)
                 claim(slug: post.slug, file: url.lastPathComponent)
+                if let issue = FrontmatterParser.filenameDateIssue(
+                    filename: url.lastPathComponent, date: post.date
+                ) {
+                    errors.append(.postValidation(file: url.lastPathComponent, issues: [issue]))
+                }
             } catch let error as OverprintError {
                 errors.append(error)
             } catch {

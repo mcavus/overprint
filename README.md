@@ -91,11 +91,19 @@ The engine (`OverprintKit`) is a library. The app, the `overprint` CLI, and anyt
 
 ## Installing
 
-Download the latest `Overprint.dmg` from [Releases](https://github.com/mcavus/overprint/releases), open it, and drag Overprint to Applications. The first launch shows the normal macOS prompt for an app downloaded from the internet. Builds are signed and notarized, so there is no "unidentified developer" warning and nothing to disable in System Settings.
+There is no download yet. Building it yourself needs macOS 14 or later and Xcode 16:
 
-Overprint updates itself, checking in the background and offering new versions. You can also check from **Overprint > Check for Updates**.
+```sh
+git clone https://github.com/mcavus/overprint.git
+cd overprint
+SKIP_NOTARIZE=1 Scripts/release.sh 0.1.0
+```
 
-The `overprint` command line tool ships inside the app. Open **Settings > Command line tool** and click Install to link it onto your PATH.
+That produces `.release/Overprint-0.1.0.dmg`, with the `overprint` command line tool embedded. Open it and drag Overprint to Applications. Because you built it locally it carries no quarantine flag, so it opens without any warning.
+
+Once it is running, open **Settings > Command line tool** and click Install to link `overprint` onto your PATH.
+
+Signed and notarized builds, published to Releases and updating themselves through Sparkle, are what the release pipeline in this repository is for. They are waiting on a signing identity, not on code.
 
 ## Using it
 
