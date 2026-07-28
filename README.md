@@ -11,7 +11,7 @@
 </p>
 
 <p align="center">
-  Your posts are plain files in a folder. Hosting is free forever on GitHub Pages,<br>
+  Your posts are plain files in a folder. Hosting is free on GitHub Pages,<br>
   with your own domain and HTTPS, and no server to run.
 </p>
 
@@ -23,17 +23,17 @@
 
 ## See it live
 
-Three sample blogs, built by Overprint and published to GitHub Pages. Each one ships inside the app, so you can open the same folder from the launch window and read the Markdown behind what you are looking at.
+Three sample blogs, built by Overprint and published to GitHub Pages. Each ships inside the app, so you can open the same folder and read the Markdown behind it.
 
 | | | |
 |---|---|---|
-| **[Field Notes](https://mcavus.github.io/overprint/starter/)** | A personal writing blog | Posts, frontmatter, and how drafts behave |
+| **[Field Notes](https://mcavus.github.io/overprint/starter/)** | A personal writing blog | Posts, post settings, and how drafts behave |
 | **[Release Notes](https://mcavus.github.io/overprint/changelog/)** | A developer changelog | Dark mode, monospaced, tags and tag pages |
 | **[Studio Journal](https://mcavus.github.io/overprint/journal/)** | A studio journal on cream paper | Theming, standalone pages, and navigation |
 
-The writing in them is invented. The sites are real output from the engine the app ships with.
+The writing is invented. The sites are real output from the engine the app ships with.
 
-They all live under the [Overprint project page](https://mcavus.github.io/overprint/), which is the short version of this README.
+There is also an [Overprint landing page](https://mcavus.github.io/overprint/).
 
 ---
 
@@ -43,13 +43,11 @@ They all live under the [Overprint project page](https://mcavus.github.io/overpr
   <img src="docs/screenshot-build.png" alt="Build mode: asking for a warm terracotta accent and a soft cream background, with the change applied and visible in the live preview" width="900">
 </p>
 
-Build mode is a chat that works directly in your site folder, editing the Markdown and the config the way you would:
+Build mode is a chat that works in your site folder, editing the Markdown and config the way you would:
 
 > *"A minimal personal blog with a dark editorial theme"* scaffolds the whole site
 > *"Make the accent a warm terracotta and the page background a soft cream"* re-themes it
 > *"Add an about page"* or *"rewrite my last post"* does exactly that
-
-Every turn commits to git before touching anything, so any change is one `git revert` away. The site is validated afterwards, and if it no longer builds, nothing is published.
 
 ## Write, with an editor that can edit
 
@@ -57,39 +55,37 @@ Every turn commits to git before touching anything, so any change is one `git re
   <img src="docs/screenshot-write.png" alt="Write mode: the posts list, a Markdown editor, and a live preview, with the Ask Claude popover open over the current draft" width="900">
 </p>
 
-A Markdown editor beside a live preview of the real, rendered page. Drafts sit in the list with your published posts and stay out of the feed until you say so.
+A Markdown editor beside a live preview of the real page. Drafts sit in the list with your published posts and stay out of the feed until you say so.
 
-**Ask Claude** works on the draft in front of you, without leaving the editor. One click for *tighten the introduction*, *fix grammar and spelling*, or *add a conclusion*, or type your own instruction. It rewrites the body in place and leaves your frontmatter alone.
+**Ask Claude** works on the draft in front of you. One click for *tighten the introduction*, *fix grammar and spelling*, or *add a conclusion*, or type your own.
 
 ### No API key, no extra bill
 
-Both surfaces run through [Claude Code](https://claude.com/claude-code) on your own machine, on your existing Claude subscription. Nothing is metered and no key is stored. Without Claude Code installed, they disable themselves and the rest of the app works exactly the same.
+Both run through [Claude Code](https://claude.com/claude-code) on your own machine, on your existing Claude subscription. Nothing is metered and no key is stored. Without Claude Code installed they disable themselves, and the rest of the app works the same.
 
-Pick the model (Opus, Sonnet, or Haiku) in Settings. If Claude Code needs a token for headless use, run `claude setup-token` and paste the result into Settings; it goes to your Keychain.
+Pick the model (Opus, Sonnet, or Haiku) in Settings. If Claude Code needs a token for headless use, run `claude setup-token` and paste it into Settings; it goes to your Keychain.
 
 ---
 
 ## Publish for free, on your own domain
 
-Overprint publishes to **GitHub Pages**. Connect a site to a repository once, and every publish after that is a single click.
+Overprint publishes to **GitHub Pages**. Connect a site to a repository once; every publish after that is one click.
 
 - **No hosting bill, at any traffic level.** Static files served off GitHub's CDN.
 - **Your own domain.** Point `blog.example.com` at it and Overprint writes the `CNAME` for you.
 - **HTTPS included**, issued and renewed automatically.
-- **Nothing to maintain.** No server and no runtime, so nothing to patch or keep up to date.
+- **Nothing to maintain.** No server and no runtime, so nothing to patch.
 - **Your writing stays yours.** It is a folder of Markdown in your own git repository, and it still builds if Overprint goes away.
 
-Commit saves your writing to `main`. Deploy builds the site with drafts excluded and publishes it to `gh-pages`. Two branches, two jobs: your source history accumulates, the generated site is replaced each time.
+Commit saves your writing to `main`. Deploy builds with drafts excluded and publishes to `gh-pages`. Your source history accumulates; the generated site is replaced each time.
 
 ## How it works
 
-Overprint builds your Markdown into a static site with its own Swift generator and previews it on localhost while you write.
+Overprint builds your Markdown into a static site with its own Swift generator, and previews it on localhost while you write.
 
-The folder on disk is the whole thing. Everything lives in `overprint.yml` and the files under `content/`, so you can edit a site in Overprint, in a text editor, with a script, or with an agent, in any order, and nothing gets out of sync.
+The folder on disk is the whole thing. Everything lives in `overprint.yml` and under `content/`, so you can edit a site in Overprint, a text editor, a script, or an agent, in any order, and nothing gets out of sync.
 
 The engine (`OverprintKit`) is a library. The app, the `overprint` CLI, and anything else you point at a site folder are thin front-ends over the same operations.
-
-**The name.** In printing, overprinting is laying one ink directly over another so the colors combine instead of one knocking the other out. The logo is two rings doing exactly that.
 
 ## Installing
 
@@ -101,11 +97,9 @@ cd overprint
 SKIP_NOTARIZE=1 Scripts/release.sh 0.1.0
 ```
 
-That produces `.release/Overprint-0.1.0.dmg`, with the `overprint` command line tool embedded. Open it and drag Overprint to Applications. Because you built it locally it carries no quarantine flag, so it opens without any warning.
+That produces `.release/Overprint-0.1.0.dmg` with the `overprint` command line tool embedded. Open it and drag Overprint to Applications.
 
 Once it is running, open **Settings > Command line tool** and click Install to link `overprint` onto your PATH.
-
-Signed and notarized builds, published to Releases and updating themselves through Sparkle, are what the release pipeline in this repository is for. They are waiting on a signing identity, not on code.
 
 ## Using it
 
@@ -133,11 +127,11 @@ static/                  copied verbatim to the site root: favicons, robots.txt,
 ```
 
 Overrides are per file: anything you leave out falls back to the built-in version, so changing the
-`<head>` does not mean owning the other templates. Most sites only ever need `head.html`.
+`<head>` does not mean owning the other templates. Most sites only need `head.html`.
 
 `overprint validate` reports what a site overrides, rejects a filename it would never render, and
-refuses a vendored `base.html` that has dropped a block the engine depends on. A file in `static/`
-that would overwrite generated output is a build error, not a silent overwrite.
+refuses a vendored `base.html` missing a block the engine depends on. A `static/` file that would
+overwrite generated output is a build error, not a silent overwrite.
 
 ## Site layout
 
@@ -174,9 +168,9 @@ nav:                 # optional header navigation
 
 Every field is optional with a sensible default. `url` is what makes the feed and sitemap use absolute links.
 
-## Frontmatter contract (frozen)
+## What goes at the top of a post
 
-Every post lives at `content/posts/YYYY-MM-DD-slug.md` and starts with a YAML frontmatter block:
+Every post lives at `content/posts/YYYY-MM-DD-slug.md` and opens with a few lines of settings between two `---` fences. Everything below the second fence is the post itself:
 
 ```markdown
 ---
@@ -190,7 +184,7 @@ draft: <true|false>
 The Markdown body starts here.
 ```
 
-`title` and a valid `date` are required. `slug` falls back to the filename with the date prefix stripped, `tags` defaults to empty, and `draft` defaults to `false`. These field names are frozen: tools and agents can rely on them.
+`title` and a valid `date` are required. `slug` falls back to the filename with the date prefix stripped, `tags` defaults to empty, and `draft` defaults to `false`. These five names will not change, so a script or an agent can count on them.
 
 Standalone pages live at `content/pages/<slug>.md` with only a `title` (plus optional `slug` and `draft`). Pages have no date and no tags, so they never appear in the post list, the feed, or tag pages.
 
@@ -205,7 +199,6 @@ Standalone pages live at `content/pages/<slug>.md` with only a `title` (plus opt
 - `feed.xml` (RSS 2.0) and `sitemap.xml`
 
 Drafts render in local preview but are excluded from everything on deploy. `dist/` is rebuilt from scratch on every build, so never edit it by hand.
-
 
 ## Building from source
 
@@ -237,9 +230,9 @@ Overprint is licensed under the **GNU General Public License v3.0 or later**. Se
 
 Copyright (C) 2026 Mark Cavusoglu
 
-You are free to use, study, modify, and redistribute it. A distributed modified version must also be GPL and ship its source, with the copyright and license notices intact. It cannot be turned into a closed-source product.
+You are free to use, study, modify, and redistribute it. A distributed modified version must also be GPL and ship its source, with the notices intact. It cannot be made closed-source.
 
-**Name and logo.** The GPL covers the code, not the name "Overprint" or the tri-color mark and lockup under `overprint-logos/`, which are reserved (GPL section 7(e) permits this). A modified version must use a different name and its own icon.
+**Name and logo.** In printing, overprinting is laying one ink over another so the colors combine, and the logo is two rings doing exactly that. The GPL covers the code, not the name "Overprint" or the tri-color mark and lockup under `overprint-logos/`, which are reserved (GPL section 7(e) permits this). A modified version must use a different name and its own icon.
 
 ### Third-party components
 
