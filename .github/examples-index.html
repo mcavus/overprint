@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex">
+<title>Overprint examples</title>
+<style>
+  :root { color-scheme: light dark; }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    padding: 72px 24px;
+    font: 16px/1.6 -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+    color: #1D1D1F;
+    background: #FBFBFC;
+  }
+  .wrap { max-width: 640px; margin: 0 auto; }
+  h1 { font-size: 28px; letter-spacing: -0.01em; margin: 0 0 8px; }
+  .lede { color: #6B6B70; margin: 0 0 40px; }
+  ul { list-style: none; margin: 0; padding: 0; }
+  li + li { margin-top: 12px; }
+  a.card {
+    display: block;
+    padding: 18px 20px;
+    border: 1px solid #E6E6EA;
+    border-radius: 12px;
+    background: #FFFFFF;
+    text-decoration: none;
+    color: inherit;
+  }
+  a.card:hover { border-color: #CDCED4; }
+  .name { font-weight: 600; }
+  .desc { color: #6B6B70; font-size: 14px; margin-top: 2px; }
+  footer { margin-top: 48px; font-size: 14px; color: #8A8A90; }
+  footer a { color: #0A7AFF; text-decoration: none; }
+  @media (prefers-color-scheme: dark) {
+    body { color: #F2F2F4; background: #161618; }
+    .lede, .desc { color: #9A9AA0; }
+    a.card { background: #1D1D20; border-color: #2E2E33; }
+    a.card:hover { border-color: #45454C; }
+    footer { color: #7A7A80; }
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>Overprint examples</h1>
+  <p class="lede">
+    Three sample blogs, built and published with
+    <a href="https://github.com/mcavus/overprint">Overprint</a>. The writing is invented; the sites
+    are real output from the same engine the app ships with.
+  </p>
+  <ul>
+    <li>
+      <a class="card" href="starter/">
+        <div class="name">Field Notes</div>
+        <div class="desc">A personal writing blog. Posts, frontmatter, and how drafts behave.</div>
+      </a>
+    </li>
+    <li>
+      <a class="card" href="changelog/">
+        <div class="name">Release Notes</div>
+        <div class="desc">A developer changelog. Dark mode, monospaced, tags and tag pages.</div>
+      </a>
+    </li>
+    <li>
+      <a class="card" href="journal/">
+        <div class="name">Studio Journal</div>
+        <div class="desc">A studio journal on cream paper. Theming, standalone pages, navigation.</div>
+      </a>
+    </li>
+  </ul>
+  <footer>
+    Each of these is a folder of Markdown files. Open the same folders in the app from its launch
+    window. <a href="https://github.com/mcavus/overprint">Overprint on GitHub</a>
+  </footer>
+</div>
+</body>
+</html>

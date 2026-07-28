@@ -1,0 +1,107 @@
+name: Examples
+
+# Builds the three bundled example sites and publishes them to gh-pages, so the README can link to
+# something live. Nothing generated is ever committed to main: this job builds into a temp directory
+# and force-pushes that as a single commit, the same shape as the app's own Deploy.
+#
+# Published at https://mcavus.github.io/overprint/<name>/
+#
+# One-time setup: Settings > Pages > Source: Deploy from a branch > gh-pages > / (root).
+
+on:
+  push:
+    branches: [main]
+    # Only the things that can change what the sites look like.
+    paths:
+      - "OverprintKit/Sources/OverprintKit/Resources/Examples/**"
+      - "OverprintKit/Sources/OverprintKit/Resources/Theme/**"
+      - "OverprintKit/Sources/OverprintKit/Engine/**"
+      - ".github/workflows/examples.yml"
+      - ".github/examples-index.html"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: examples
+  cancel-in-progress: true
+
+jobs:
+  publish:
+    runs-on: macos-15
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Build the CLI
+        run: swift build --package-path OverprintKit -c release --product overprint
+
+      - name: Build each example
+        env:
+          # No custom domain, so the sites live under the repository path. This matters: the
+          # sitemap, the feed, and the 404 page's <base> are all derived from `url`, and the
+          # bundled examples carry example.com placeholders that would be wrong here.
+          SITE_ROOT: https://mcavus.github.io/overprint
+        run: |
+          set -euo pipefail
+          CLI="$(swift build --package-path OverprintKit -c release --show-bin-path)/overprint"
+          EXAMPLES=OverprintKit/Sources/OverprintKit/Resources/Examples
+          OUT="$RUNNER_TEMP/site"
+          mkdir -p "$OUT"
+
+          for name in starter changelog journal; do
+            work="$RUNNER_TEMP/build-$name"
+            rm -rf "$work"
+            cp -R "$EXAMPLES/$name" "$work"
+
+            # Point the site at where it will actually be served. Replace rather than append, so a
+            # placeholder url in the example does not survive alongside the real one.
+            grep -v '^url:' "$work/overprint.yml" > "$work/overprint.yml.tmp"
+            echo "url: $SITE_ROOT/$name" >> "$work/overprint.yml.tmp"
+            mv "$work/overprint.yml.tmp" "$work/overprint.yml"
+
+            "$CLI" validate "$work"
+            "$CLI" build "$work"
+            mkdir -p "$OUT/$name"
+            cp -R "$work/dist/." "$OUT/$name/"
+          done
+
+          # These are fictional blogs. They exist to be looked at, not to compete with real writing
+          # in search results, so keep them out of the index.
+          find "$OUT" -name '*.html' -exec \
+            perl -pi -e 's{<head>}{<head>\n<meta name="robots" content="noindex">}' {} +
+
+          cp .github/examples-index.html "$OUT/index.html"
+          # Without this, Pages runs the output through Jekyll.
+          touch "$OUT/.nojekyll"
+
+      - name: Check the build actually produced what we expect
+        run: |
+          set -euo pipefail
+          OUT="$RUNNER_TEMP/site"
+          for name in starter changelog journal; do
+            test -f "$OUT/$name/index.html" || { echo "$name: no index.html" >&2; exit 1; }
+            test -f "$OUT/$name/404.html"   || { echo "$name: no 404.html" >&2; exit 1; }
+            grep -q 'name="robots" content="noindex"' "$OUT/$name/index.html" \
+              || { echo "$name: index.html is missing the noindex tag" >&2; exit 1; }
+            # The 404 is served from arbitrary paths, so its <base> has to carry the repo subpath.
+            grep -q "<base href=\"/overprint/$name/\">" "$OUT/$name/404.html" \
+              || { echo "$name: 404.html has the wrong <base>" >&2; exit 1; }
+          done
+          test -f "$OUT/index.html"
+
+      - name: Publish to gh-pages
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          cd "$RUNNER_TEMP/site"
+          git init -q
+          git checkout -q -b gh-pages
+          git add -A
+          git -c user.name="github-actions[bot]" \
+              -c user.email="41898282+github-actions[bot]@users.noreply.github.com" \
+              commit -q -m "Publish examples from ${GITHUB_SHA:0:7}"
+          # A single-commit force push: this branch is disposable output, not history.
+          git push -q --force \
+            "https://x-access-token:${GH_TOKEN}@github.com/${GITHUB_REPOSITORY}.git" gh-pages
