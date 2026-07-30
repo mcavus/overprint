@@ -11,7 +11,14 @@
 <meta property="og:type" content="website">
 <!-- This page answers on more than one address, so name the one search engines should keep. -->
 <link rel="canonical" href="https://overprint.mcavus.com/">
-<link rel="icon" href="img/mark.png">
+<!-- Served from the site root, not img/, so iOS finds /apple-touch-icon.png by convention even
+     where it ignores the link tag. A lone rel="icon" is why the icon never showed on iPhone. -->
+<link rel="icon" href="/favicon.ico" sizes="any">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="/apple-touch-icon.png">
+<link rel="icon" type="image/png" sizes="192x192" href="/icon-192.png">
+<meta name="theme-color" content="#FFFFFF" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#08080A" media="(prefers-color-scheme: dark)">
 <style>
   /* Light by default, matching the app's own chrome. Dark follows the reader's system. */
   :root {

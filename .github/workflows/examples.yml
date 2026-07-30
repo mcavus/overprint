@@ -84,6 +84,9 @@ jobs:
              docs/screenshot-hero.png docs/screenshot-build.png \
              docs/screenshot-write.png "$OUT/img/"
           cp overprint-logos/overprint-mark.png "$OUT/img/mark.png"
+          # Icons live at the site root: iOS looks for /apple-touch-icon.png by convention, and
+          # browsers fall back to /favicon.ico there whether or not a link tag names it.
+          cp docs/favicon.ico docs/favicon.svg docs/apple-touch-icon.png docs/icon-192.png "$OUT/"
           # Without this, Pages runs the output through Jekyll.
           touch "$OUT/.nojekyll"
 
@@ -117,6 +120,10 @@ jobs:
           # Losing this file silently drops the custom domain on the next publish.
           grep -qx "overprint.mcavus.com" "$OUT/CNAME" \
             || { echo "CNAME missing or wrong; the custom domain would be lost" >&2; exit 1; }
+          # A missing icon here fails silently: the page renders, the tab just looks unfinished.
+          for f in favicon.ico favicon.svg apple-touch-icon.png icon-192.png; do
+            test -s "$OUT/$f" || { echo "missing $f at the site root" >&2; exit 1; }
+          done
 
       - name: Publish to gh-pages
         env:
