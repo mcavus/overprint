@@ -27,13 +27,13 @@ Three sample blogs, built by Overprint and published to GitHub Pages. Each ships
 
 | | | |
 |---|---|---|
-| **[Field Notes](https://mcavus.github.io/overprint/starter/)** | A personal writing blog | Posts, post settings, and how drafts behave |
-| **[Release Notes](https://mcavus.github.io/overprint/changelog/)** | A developer changelog | Dark mode, monospaced, tags and tag pages |
-| **[Studio Journal](https://mcavus.github.io/overprint/journal/)** | A studio journal on cream paper | Theming, standalone pages, and navigation |
+| **[Field Notes](https://overprint.mcavus.com/starter/)** | A personal writing blog | Posts, post settings, and how drafts behave |
+| **[Release Notes](https://overprint.mcavus.com/changelog/)** | A developer changelog | Dark mode, monospaced, tags and tag pages |
+| **[Studio Journal](https://overprint.mcavus.com/journal/)** | A studio journal on cream paper | Theming, standalone pages, and navigation |
 
 The writing is invented. The sites are real output from the engine the app ships with.
 
-There is also an [Overprint landing page](https://mcavus.github.io/overprint/).
+There is also an [Overprint landing page](https://overprint.mcavus.com/).
 
 ---
 

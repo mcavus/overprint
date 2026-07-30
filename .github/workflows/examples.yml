@@ -4,9 +4,11 @@ name: Examples
 # something live. Nothing generated is ever committed to main: this job builds into a temp directory
 # and force-pushes that as a single commit, the same shape as the app's own Deploy.
 #
-# Published at https://mcavus.github.io/overprint/<name>/
+# Published at https://overprint.mcavus.com/, with the examples at /<name>/.
 #
-# One-time setup: Settings > Pages > Source: Deploy from a branch > gh-pages > / (root).
+# One-time setup: Settings > Pages > Source: Deploy from a branch > gh-pages > / (root), plus a
+# CNAME record for `overprint` pointing at mcavus.github.io. The custom domain needs no setting
+# in the UI: GitHub reads the CNAME file this job writes.
 
 on:
   push:
@@ -39,10 +41,11 @@ jobs:
 
       - name: Build each example
         env:
-          # No custom domain, so the sites live under the repository path. This matters: the
-          # sitemap, the feed, and the 404 page's <base> are all derived from `url`, and the
-          # bundled examples carry example.com placeholders that would be wrong here.
-          SITE_ROOT: https://mcavus.github.io/overprint
+          # The site has its own domain, so it lives at the root rather than under /overprint/.
+          # This matters: the sitemap, the feed, and the 404 page's <base> all derive from `url`,
+          # and the bundled examples carry example.com placeholders that would be wrong here.
+          SITE_ROOT: https://overprint.mcavus.com
+          SITE_DOMAIN: overprint.mcavus.com
         run: |
           set -euo pipefail
           CLI="$(swift build --package-path OverprintKit -c release --show-bin-path)/overprint"
@@ -84,6 +87,11 @@ jobs:
           # Without this, Pages runs the output through Jekyll.
           touch "$OUT/.nojekyll"
 
+          # The custom domain lives in this file, not in a GitHub setting. This job force-pushes
+          # gh-pages from a fresh git init, so anything the Pages UI writes to that branch is
+          # destroyed on the next run. Writing it ourselves is what makes the domain survive.
+          echo "$SITE_DOMAIN" > "$OUT/CNAME"
+
       - name: Check the build actually produced what we expect
         run: |
           set -euo pipefail
@@ -93,8 +101,8 @@ jobs:
             test -f "$OUT/$name/404.html"   || { echo "$name: no 404.html" >&2; exit 1; }
             grep -q 'name="robots" content="noindex"' "$OUT/$name/index.html" \
               || { echo "$name: index.html is missing the noindex tag" >&2; exit 1; }
-            # The 404 is served from arbitrary paths, so its <base> has to carry the repo subpath.
-            grep -q "<base href=\"/overprint/$name/\">" "$OUT/$name/404.html" \
+            # The 404 is served from arbitrary paths, so its <base> has to name the site root.
+            grep -q "<base href=\"/$name/\">" "$OUT/$name/404.html" \
               || { echo "$name: 404.html has the wrong <base>" >&2; exit 1; }
           done
           test -f "$OUT/index.html"
@@ -106,6 +114,9 @@ jobs:
           # The landing page is the one page here that should reach search results.
           grep -q 'name="robots" content="noindex"' "$OUT/index.html" \
             && { echo "landing page picked up a noindex tag" >&2; exit 1; } || true
+          # Losing this file silently drops the custom domain on the next publish.
+          grep -qx "overprint.mcavus.com" "$OUT/CNAME" \
+            || { echo "CNAME missing or wrong; the custom domain would be lost" >&2; exit 1; }
 
       - name: Publish to gh-pages
         env:
