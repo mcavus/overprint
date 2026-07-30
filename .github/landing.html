@@ -9,6 +9,8 @@
 <meta property="og:description" content="A native macOS blogging app you can talk to. Free and open source.">
 <meta property="og:image" content="img/screenshot-hero.png">
 <meta property="og:type" content="website">
+<!-- Reachable at both mcavus.github.io/overprint/ and mcavus.com/overprint/; name one. -->
+<link rel="canonical" href="https://mcavus.com/overprint/">
 <link rel="icon" href="img/mark.png">
 <style>
   /* Light by default, matching the app's own chrome. Dark follows the reader's system. */
@@ -58,10 +60,9 @@
     border-bottom: 1px solid var(--line-soft);
   }
   .bar { display: flex; align-items: center; gap: 10px; height: 60px; }
-  .bar .home { display: inline-flex; align-items: center; gap: 9px; text-decoration: none; }
-  .bar .mark { width: 23px; height: 23px; }
-  /* The wordmark is lowercase, as in the lockup. */
-  .bar .name { font-weight: 700; letter-spacing: -.022em; font-size: 17px; color: var(--ink); }
+  .bar .home { display: inline-flex; line-height: 0; text-decoration: none; }
+  /* The same lockup asset the README uses, not a hand-set wordmark. */
+  .bar .lockup { height: 24px; width: auto; display: block; }
   .bar nav { margin-left: auto; display: flex; gap: 20px; align-items: center; }
   .bar nav a { color: var(--mute); text-decoration: none; font-size: 14px; }
   .bar nav a:hover { color: var(--ink); }
@@ -223,8 +224,10 @@
 <header>
   <div class="wrap bar">
     <a class="home" href="#">
-      <img class="mark" src="img/mark.png" alt="">
-      <span class="name">overprint</span>
+      <picture>
+        <source media="(prefers-color-scheme: dark)" srcset="img/logo-dark.png">
+        <img class="lockup" src="img/logo.png" alt="Overprint">
+      </picture>
     </a>
     <nav>
       <a href="#build">Build</a>
@@ -326,17 +329,17 @@
   <div class="wrap">
     <h2>Live examples</h2>
     <div class="ex">
-      <a href="starter/">
+      <a href="starter/" target="_blank" rel="noopener">
         <div class="name">Field Notes</div>
         <div class="what">A personal writing blog. Posts, frontmatter, and how drafts behave.</div>
         <div class="go">Visit →</div>
       </a>
-      <a href="changelog/">
+      <a href="changelog/" target="_blank" rel="noopener">
         <div class="name">Release Notes</div>
         <div class="what">A developer changelog. Dark, monospaced, tags and tag pages.</div>
         <div class="go">Visit →</div>
       </a>
-      <a href="journal/">
+      <a href="journal/" target="_blank" rel="noopener">
         <div class="name">Studio Journal</div>
         <div class="what">A studio journal on cream paper. Theming, pages, and navigation.</div>
         <div class="go">Visit →</div>
@@ -365,7 +368,7 @@
     <a href="https://github.com/mcavus/overprint">GitHub</a>
     <a href="https://github.com/mcavus/overprint#readme">Docs</a>
     <a href="https://github.com/mcavus/overprint/blob/main/LICENSE">GPL-3.0</a>
-    <span class="right">Built by <a href="https://mcavus.com">Mark Cavusoglu</a></span>
+    <span class="right">Built by <a href="https://mcavus.com" target="_blank" rel="noopener">Mark Cavusoglu</a></span>
   </div>
 </footer>
 

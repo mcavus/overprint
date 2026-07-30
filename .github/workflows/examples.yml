@@ -68,14 +68,17 @@ jobs:
           done
 
           # These are fictional blogs. They exist to be looked at, not to compete with real writing
-          # in search results, so keep them out of the index.
+          # in search results, so keep them out of the index. This runs BEFORE the landing page is
+          # copied in below, which is deliberate: the landing page SHOULD be indexed. Reversing
+          # these two steps would quietly de-index it, so the check step asserts both directions.
           find "$OUT" -name '*.html' -exec \
             perl -pi -e 's{<head>}{<head>\n<meta name="robots" content="noindex">}' {} +
 
           # The landing page, with the images the README already uses.
           cp .github/landing.html "$OUT/index.html"
           mkdir -p "$OUT/img"
-          cp docs/screenshot-hero.png docs/screenshot-build.png \
+          cp docs/logo.png docs/logo-dark.png \
+             docs/screenshot-hero.png docs/screenshot-build.png \
              docs/screenshot-write.png "$OUT/img/"
           cp overprint-logos/overprint-mark.png "$OUT/img/mark.png"
           # Without this, Pages runs the output through Jekyll.
@@ -96,10 +99,13 @@ jobs:
           done
           test -f "$OUT/index.html"
           # The landing page is useless with broken images, and a missing file here is silent.
-          for img in screenshot-hero screenshot-build screenshot-write mark; do
+          for img in logo logo-dark screenshot-hero screenshot-build screenshot-write mark; do
             test -s "$OUT/img/$img.png" || { echo "missing img/$img.png" >&2; exit 1; }
           done
           grep -q "star" "$OUT/index.html" || { echo "landing page lost its content" >&2; exit 1; }
+          # The landing page is the one page here that should reach search results.
+          grep -q 'name="robots" content="noindex"' "$OUT/index.html" \
+            && { echo "landing page picked up a noindex tag" >&2; exit 1; } || true
 
       - name: Publish to gh-pages
         env:
