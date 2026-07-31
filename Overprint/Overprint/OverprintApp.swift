@@ -18,6 +18,13 @@ struct OverprintApp: App {
         Window("Overprint", id: Self.mainWindowID) {
             RootView()
                 .environmentObject(model)
+                // Xcode-style: the close button closes the project, not the app. Without this the
+                // only window goes away and there is no route back to opening another site.
+                .background(WindowCloseInterceptor {
+                    guard model.route == .site else { return true }
+                    model.closeSite()
+                    return false
+                })
                 // Hand the reopen action to the delegate, so clicking the Dock icon can bring the
                 // window back. Without it, closing the only window strands the app with no UI.
                 .onAppear { AppDelegate.reopenMainWindow = { openWindow(id: Self.mainWindowID) } }
@@ -42,6 +49,61 @@ struct OverprintApp: App {
         Settings {
             SettingsView(ai: model.aiManager, updater: updater)
                 .environmentObject(model)
+        }
+    }
+}
+
+/// Lets the window's close button be answered by the app rather than by AppKit.
+///
+/// `shouldClose` returns false to keep the window on screen, which is how closing a site returns to
+/// the launch view instead of leaving the app with no UI.
+private struct WindowCloseInterceptor: NSViewRepresentable {
+    let shouldClose: () -> Bool
+
+    func makeNSView(context: Context) -> NSView {
+        let view = NSView()
+        DispatchQueue.main.async {
+            guard let window = view.window else { return }
+            context.coordinator.attach(to: window)
+        }
+        return view
+    }
+
+    func updateNSView(_ view: NSView, context: Context) {
+        context.coordinator.shouldClose = shouldClose
+        if let window = view.window { context.coordinator.attach(to: window) }
+    }
+
+    func makeCoordinator() -> Coordinator { Coordinator(shouldClose: shouldClose) }
+
+    final class Coordinator: NSObject, NSWindowDelegate {
+        var shouldClose: () -> Bool
+        /// The delegate SwiftUI installed. Forwarding to it keeps whatever else it does working.
+        private weak var previous: NSWindowDelegate?
+        private weak var window: NSWindow?
+
+        init(shouldClose: @escaping () -> Bool) {
+            self.shouldClose = shouldClose
+        }
+
+        func attach(to window: NSWindow) {
+            guard window.delegate !== self else { return }
+            previous = window.delegate
+            window.delegate = self
+            self.window = window
+        }
+
+        func windowShouldClose(_ sender: NSWindow) -> Bool {
+            shouldClose()
+        }
+
+        override func responds(to selector: Selector!) -> Bool {
+            super.responds(to: selector) || (previous?.responds(to: selector) ?? false)
+        }
+
+        override func forwardingTarget(for selector: Selector!) -> Any? {
+            if super.responds(to: selector) { return nil }
+            return previous
         }
     }
 }
