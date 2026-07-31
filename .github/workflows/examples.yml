@@ -87,6 +87,7 @@ jobs:
           # Icons live at the site root: iOS looks for /apple-touch-icon.png by convention, and
           # browsers fall back to /favicon.ico there whether or not a link tag names it.
           cp docs/favicon.ico docs/favicon.svg docs/apple-touch-icon.png docs/icon-192.png "$OUT/"
+          cp docs/analytics.js "$OUT/"
           # Without this, Pages runs the output through Jekyll.
           touch "$OUT/.nojekyll"
 
@@ -121,9 +122,13 @@ jobs:
           grep -qx "overprint.mcavus.com" "$OUT/CNAME" \
             || { echo "CNAME missing or wrong; the custom domain would be lost" >&2; exit 1; }
           # A missing icon here fails silently: the page renders, the tab just looks unfinished.
-          for f in favicon.ico favicon.svg apple-touch-icon.png icon-192.png; do
+          for f in favicon.ico favicon.svg apple-touch-icon.png icon-192.png analytics.js; do
             test -s "$OUT/$f" || { echo "missing $f at the site root" >&2; exit 1; }
           done
+          # An analytics file that never fires is invisible; assert the token was not left as a
+          # placeholder, which would silently collect nothing.
+          grep -q 'PASTE' "$OUT/analytics.js" \
+            && { echo "analytics.js still has a placeholder token" >&2; exit 1; } || true
 
       - name: Publish to gh-pages
         env:
