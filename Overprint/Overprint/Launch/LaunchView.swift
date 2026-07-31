@@ -265,6 +265,10 @@ private struct LaunchActionButton: View {
         }
         .buttonStyle(.plain)
         .onHover { hovering = $0 }
+        // The padding above exists so the hover background extends past the text. Pulling the row
+        // back out by the same amount keeps the icon tile on the column's left edge, with the
+        // highlight bleeding into the gutter.
+        .padding(.horizontal, -12)
     }
 }
 
