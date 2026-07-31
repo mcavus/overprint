@@ -204,7 +204,9 @@ struct BuildView: View {
 
     private var composer: some View {
         VStack(spacing: 0) {
-            HStack(alignment: .bottom, spacing: 8) {
+            // Centre, not bottom: the send button is taller than one line of text, so bottom
+            // alignment sits the placeholder at the bottom of that taller row.
+            HStack(alignment: .center, spacing: 8) {
                 TextField(composerPlaceholder, text: $model.composer, axis: .vertical)
                     .textFieldStyle(.plain)
                     .font(OPFont.ui(13.5))
@@ -215,16 +217,16 @@ struct BuildView: View {
 
                 Button { model.send() } label: {
                     Image(systemName: "arrow.up")
-                        .font(.system(size: 14, weight: .semibold))
+                        .font(.system(size: 13, weight: .semibold))
                         .foregroundStyle(.white)
-                        .frame(width: 30, height: 30)
-                        .background(OPColor.accent, in: RoundedRectangle(cornerRadius: 8))
+                        .frame(width: 26, height: 26)
+                        .background(OPColor.accent, in: RoundedRectangle(cornerRadius: 7))
                 }
                 .buttonStyle(.plain)
                 .disabled(composerDisabled || model.composer.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty)
                 .opacity(composerDisabled ? 0.5 : 1)
             }
-            .padding(EdgeInsets(top: 7, leading: 14, bottom: 7, trailing: 7))
+            .padding(EdgeInsets(top: 6, leading: 13, bottom: 6, trailing: 6))
             .background(OPColor.surface, in: RoundedRectangle(cornerRadius: 12))
             .overlay(RoundedRectangle(cornerRadius: 12).strokeBorder(Color.black.opacity(0.14)))
             .shadow(color: Color.black.opacity(0.04), radius: 1, y: 1)
