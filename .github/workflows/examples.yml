@@ -125,10 +125,12 @@ jobs:
           for f in favicon.ico favicon.svg apple-touch-icon.png icon-192.png analytics.js; do
             test -s "$OUT/$f" || { echo "missing $f at the site root" >&2; exit 1; }
           done
-          # An analytics file that never fires is invisible; assert the token was not left as a
-          # placeholder, which would silently collect nothing.
-          grep -q 'PASTE' "$OUT/analytics.js" \
-            && { echo "analytics.js still has a placeholder token" >&2; exit 1; } || true
+          # An analytics file that never fires is invisible, so assert the token is a real value
+          # rather than empty or a placeholder. This matches the assignment specifically: the
+          # script also names the placeholder in a guard, so searching the whole file finds it
+          # whatever the token is set to.
+          grep -qE '^var CF_BEACON_TOKEN = "[0-9a-f]{32}";$' "$OUT/analytics.js" \
+            || { echo "analytics.js has no real Cloudflare token" >&2; exit 1; }
 
       - name: Publish to gh-pages
         env:
