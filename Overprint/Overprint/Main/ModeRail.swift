@@ -28,10 +28,7 @@ struct ModeRail: View {
             RailTile(icon: "bubble.left.and.bubble.right", label: "Build", active: model.mode == .build) {
                 model.mode = .build
             }
-            // `square.and.pencil` draws its pencil above and right of the square, so the glyph's
-            // ink sits low-left inside a bounding box SwiftUI centres. Nudge it back optically.
-            RailTile(icon: "square.and.pencil", label: "Write", active: model.mode == .write,
-                     iconOffset: CGSize(width: 1, height: 1)) {
+            RailTile(icon: "doc.text", label: "Write", active: model.mode == .write) {
                 model.mode = .write
             }
 
@@ -58,8 +55,6 @@ private struct RailTile: View {
     let icon: String
     let label: String
     let active: Bool
-    /// Optical correction for glyphs whose ink is not centred in their bounding box.
-    var iconOffset: CGSize = .zero
     let action: () -> Void
 
     @State private var hovering = false
@@ -74,7 +69,6 @@ private struct RailTile: View {
                     Image(systemName: icon)
                         .font(.system(size: 15, weight: .medium))
                         .foregroundStyle(active ? Color.white : OPColor.textMuted)
-                        .offset(x: iconOffset.width, y: iconOffset.height)
                 }
                 Text(label)
                     .font(OPFont.ui(10, weight: active ? .semibold : .medium))
