@@ -84,7 +84,15 @@ struct SettingsView: View {
                     .disabled(tokenInput.trimmingCharacters(in: .whitespaces).isEmpty)
                 }
 
-                Text("For headless use, run claude setup-token in a terminal and paste the token here. It is stored in your Keychain.")
+                // macOS renders the Keychain prompt itself and gives an app no room to explain
+                // what it is asking for, so the explanation has to live here, before the prompt
+                // can appear.
+                Text("For headless use, run claude setup-token in a terminal and paste the token here.")
+                    .font(.caption2)
+                    .foregroundStyle(.secondary)
+                    .fixedSize(horizontal: false, vertical: true)
+
+                Text("The token is stored in your Keychain, never in a file and never in this app's settings. It is passed only to the Claude Code process running on this Mac. Overprint has no server and sends it nowhere. macOS will ask permission the first time, naming it \"\(Keychain.label)\".")
                     .font(.caption2)
                     .foregroundStyle(.secondary)
                     .fixedSize(horizontal: false, vertical: true)
