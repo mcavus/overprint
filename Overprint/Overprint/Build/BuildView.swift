@@ -11,11 +11,21 @@ struct BuildView: View {
     private let scrollAnchor = "op-transcript-bottom"
     @AppStorage("pane.assistantWidth") private var assistantWidth: Double = PaneWidth.assistantDefault
 
-    private let suggestions: [(label: String, prompt: String)] = [
+    private let scaffoldSuggestions: [(label: String, prompt: String)] = [
         ("A minimal personal blog", "Build a minimal personal blog with an editorial theme and dark mode."),
         ("A photography journal", "Build a photography journal with large images and a clean grid."),
         ("A developer changelog", "Build a developer changelog with dated entries and tags."),
     ]
+
+    private let changeSuggestions: [(label: String, prompt: String)] = [
+        ("Change the look", "Change the accent colour and the page background to something warmer."),
+        ("Add an about page", "Add an about page and put it in the navigation."),
+        ("Rewrite my last post", "Rewrite my most recent post to be shorter and clearer."),
+    ]
+
+    private var suggestions: [(label: String, prompt: String)] {
+        model.hasContent ? changeSuggestions : scaffoldSuggestions
+    }
 
     var body: some View {
         HSplitView {
@@ -72,11 +82,13 @@ struct BuildView: View {
                 .scaledToFit()
                 .frame(width: 46, height: 46)
                 .padding(.bottom, 18)
-            Text("Describe your site")
+            Text(model.hasContent ? "What would you like to change?" : "Describe your site")
                 .font(OPFont.ui(17, weight: .semibold))
                 .foregroundStyle(OPColor.ink)
                 .padding(.bottom, 6)
-            Text("Tell Claude what to build. It scaffolds the project, applies a theme, and serves it locally.")
+            Text(model.hasContent
+                 ? "Claude works in this folder, editing your posts, pages, and theme."
+                 : "Tell Claude what to build. It scaffolds the project, applies a theme, and serves it locally.")
                 .font(OPFont.ui(13))
                 .foregroundStyle(OPColor.textMuted)
                 .multilineTextAlignment(.center)
@@ -247,7 +259,11 @@ struct BuildView: View {
 
     private var composerPlaceholder: String {
         if !ai.isAvailable { return "Install Claude Code to start building" }
-        return model.hasStarted ? "Ask Claude for a change…" : "Describe the site you want to build…"
+        // An existing site is never "built" from here, only changed, so it should not be asked
+        // to describe a blog it already has.
+        return model.hasStarted || model.hasContent
+            ? "Ask Claude for a change…"
+            : "Describe the site you want to build…"
     }
 
     // MARK: Preview pane
@@ -346,7 +362,9 @@ struct BuildView: View {
                     .strokeBorder(style: StrokeStyle(lineWidth: 1.5, dash: [5, 4]))
                     .foregroundStyle(Color.black.opacity(0.18))
             )
-            Text("Describe your site to start the server.")
+            Text(model.hasContent
+                 ? "Ask for a change to start the server."
+                 : "Describe your site to start the server.")
                 .font(OPFont.ui(12))
                 .foregroundStyle(OPColor.textFainter)
                 .multilineTextAlignment(.center)

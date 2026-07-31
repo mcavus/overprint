@@ -50,6 +50,13 @@ final class BuildModel: ObservableObject {
 
     var hasStarted: Bool { !turns.isEmpty }
 
+    /// Whether the site already has posts. The first turn on an empty site scaffolds; every turn
+    /// after that edits what is there, and the empty state should say so rather than offering to
+    /// build a blog the author already has.
+    var hasContent: Bool {
+        ((try? SiteStore(siteURL: site).loadPosts().count) ?? 0) > 0
+    }
+
     /// The index page of the served site, or nil when the server is stopped.
     var previewURL: URL? {
         guard serverManager.isServing, let base = serverManager.url else { return nil }
@@ -67,8 +74,7 @@ final class BuildModel: ObservableObject {
         composer = ""
         // A brand new site has no content to edit, so the first turn always scaffolds. After that
         // the agent can do anything, which is the whole point of chatting with it.
-        let hasContent = ((try? SiteStore(siteURL: site).loadPosts().count) ?? 0) > 0
-        Task { hasContent ? await runAgent(prompt: text) : await run(prompt: text) }
+        Task { self.hasContent ? await runAgent(prompt: text) : await run(prompt: text) }
     }
 
     func useSuggestion(_ text: String) {
