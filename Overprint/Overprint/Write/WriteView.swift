@@ -55,6 +55,7 @@ struct WriteView: View {
                 .contentShape(Rectangle())
             }
             .buttonStyle(.plain)
+            .pointingHand()
             .popover(isPresented: $askOpen, arrowEdge: .bottom) {
                 AskClaudePopover(ai: ai, model: model, isPresented: $askOpen)
             }
@@ -106,6 +107,7 @@ struct WriteView: View {
                 }
         }
         .buttonStyle(.plain)
+        .pointingHand()
     }
 
     @ViewBuilder private var editorAndPreview: some View {

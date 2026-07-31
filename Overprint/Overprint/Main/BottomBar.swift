@@ -78,6 +78,7 @@ struct BottomBar: View {
             }
         }
         .buttonStyle(.plain)
+        .pointingHand()
         .disabled(!server.isServing)
         .opacity(server.isServing ? 1 : 0.5)
     }
@@ -94,6 +95,7 @@ struct BottomBar: View {
             }
         }
         .buttonStyle(.plain)
+        .pointingHand()
     }
 
     private var commitButton: some View {
@@ -104,6 +106,7 @@ struct BottomBar: View {
             }
         }
         .buttonStyle(.plain)
+        .pointingHand()
     }
 
     private var deployButton: some View {
@@ -119,6 +122,7 @@ struct BottomBar: View {
             .contentShape(Rectangle())
         }
         .buttonStyle(.plain)
+        .pointingHand()
     }
 
     /// A bordered, white bar button label (Open / Serve / Commit share this look).

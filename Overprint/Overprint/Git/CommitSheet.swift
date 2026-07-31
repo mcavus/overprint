@@ -47,6 +47,7 @@ struct CommitSheet: View {
                         .foregroundStyle(OPColor.accent)
                 }
                 .buttonStyle(.plain)
+                .pointingHand()
             }
 
             phaseView
@@ -55,6 +56,7 @@ struct CommitSheet: View {
                 Spacer()
                 Button("Cancel") { isPresented = false }
                     .buttonStyle(.plain)
+                    .pointingHand()
                     .font(OPFont.ui(13))
                     .foregroundStyle(OPColor.textSecondary)
                 Button {
@@ -69,6 +71,7 @@ struct CommitSheet: View {
                         .opacity(canCommit ? 1 : 0.5)
                 }
                 .buttonStyle(.plain)
+                .pointingHand()
                 .disabled(!canCommit)
             }
         }

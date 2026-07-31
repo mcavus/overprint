@@ -76,11 +76,13 @@ struct DeployDialog: View {
                 } else {
                     Button("Change…") { editing = true }
                         .buttonStyle(.plain)
+                        .pointingHand()
                         .font(OPFont.ui(12))
                         .foregroundStyle(OPColor.textSecondary)
                     Spacer()
                     Button("Cancel") { isPresented = false }
                         .buttonStyle(.plain)
+                        .pointingHand()
                         .font(OPFont.ui(13))
                         .foregroundStyle(OPColor.textSecondary)
                     primaryButton(git.deployPhase == .working ? "Deploying…" : "Deploy", enabled: git.deployPhase != .working) {
@@ -176,6 +178,7 @@ struct DeployDialog: View {
                 .opacity(enabled ? 1 : 0.5)
         }
         .buttonStyle(.plain)
+        .pointingHand()
         .disabled(!enabled)
     }
 

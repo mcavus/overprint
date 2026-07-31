@@ -16,6 +16,7 @@ struct ModeRail: View {
                     .contentShape(Rectangle())
             }
             .buttonStyle(.plain)
+            .pointingHand()
             .help("Close this site and go back to the launch window")
             .padding(.top, 44)
             .padding(.bottom, 14)
@@ -40,6 +41,7 @@ struct ModeRail: View {
                     .foregroundStyle(OPColor.textMuted)
             }
             .buttonStyle(.plain)
+            .pointingHand()
             .padding(.bottom, 16)
         }
         .frame(width: 77)
@@ -79,6 +81,7 @@ private struct RailTile: View {
             .contentShape(Rectangle())
         }
         .buttonStyle(.plain)
+        .pointingHand()
         .onHover { hovering = $0 }
     }
 }

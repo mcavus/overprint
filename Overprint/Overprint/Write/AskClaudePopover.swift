@@ -57,6 +57,7 @@ struct AskClaudePopover: View {
                     .background(RoundedRectangle(cornerRadius: 7).fill(OPColor.accent))
             }
             .buttonStyle(.plain)
+            .pointingHand()
             .disabled(ai.state == .busy)
         }
         .padding(.horizontal, 12)
@@ -80,6 +81,7 @@ struct AskClaudePopover: View {
                         .contentShape(Rectangle())
                     }
                     .buttonStyle(.plain)
+                    .pointingHand()
                 }
             }
         case .busy:
@@ -132,6 +134,7 @@ struct AskClaudePopover: View {
                     .background(RoundedRectangle(cornerRadius: 7).fill(OPColor.accent))
             }
             .buttonStyle(.plain)
+            .pointingHand()
         }
     }
 

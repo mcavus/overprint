@@ -46,6 +46,7 @@ struct ExampleRow: View {
                         .contentShape(Rectangle())
                 }
                 .buttonStyle(.plain)
+                .pointingHand()
                 .help("Remove this example from the list")
             } else {
                 Text("EXAMPLE")

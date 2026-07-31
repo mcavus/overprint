@@ -20,6 +20,7 @@ struct PostsListView: View {
                         .frame(width: 26, height: 26)
                 }
                 .buttonStyle(.plain)
+                .pointingHand()
                 .help("New post")
             }
             .padding(.leading, 18)
@@ -82,6 +83,7 @@ private struct PostRow: View {
             .contentShape(Rectangle())
         }
         .buttonStyle(.plain)
+        .pointingHand()
         .onHover { hovering = $0 }
         .overlay(alignment: .trailing) {
             if hovering {
@@ -93,6 +95,7 @@ private struct PostRow: View {
                         .contentShape(Rectangle())
                 }
                 .buttonStyle(.plain)
+                .pointingHand()
                 .help("Move this post to the Trash")
                 .padding(.trailing, 8)
             }

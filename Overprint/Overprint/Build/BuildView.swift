@@ -240,6 +240,7 @@ struct BuildView: View {
                         .background(OPColor.accent, in: RoundedRectangle(cornerRadius: 7))
                 }
                 .buttonStyle(.plain)
+                .pointingHand()
                 .disabled(composerDisabled || model.composer.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty)
                 .opacity(composerDisabled ? 0.5 : 1)
             }
@@ -299,6 +300,7 @@ struct BuildView: View {
                     .frame(width: 24, height: 24)
             }
             .buttonStyle(.plain)
+            .pointingHand()
             .disabled(!server.isServing)
 
             HStack(spacing: 8) {
@@ -398,6 +400,7 @@ private struct SuggestionChip: View {
             .contentShape(Rectangle())
         }
         .buttonStyle(.plain)
+        .pointingHand()
         .disabled(!enabled)
         .opacity(enabled ? 1 : 0.5)
         .onHover { hovering = enabled && $0 }

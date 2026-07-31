@@ -95,6 +95,7 @@ struct LaunchView: View {
                 Spacer()
                 Button("Clear") { model.clearRecents() }
                     .buttonStyle(.plain)
+                    .pointingHand()
                     .font(OPFont.ui(12))
                     .foregroundStyle(OPColor.textFainter)
             }
@@ -264,6 +265,7 @@ private struct LaunchActionButton: View {
             .contentShape(Rectangle())
         }
         .buttonStyle(.plain)
+        .pointingHand()
         .onHover { hovering = $0 }
         // The padding above exists so the hover background extends past the text. Pulling the row
         // back out by the same amount keeps the icon tile on the column's left edge, with the
@@ -314,6 +316,7 @@ private struct RecentRow: View {
                         .contentShape(Rectangle())
                 }
                 .buttonStyle(.plain)
+                .pointingHand()
                 .help("Move this site to the Trash")
             } else {
                 Text(whenText)
