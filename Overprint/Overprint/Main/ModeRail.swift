@@ -8,12 +8,17 @@ struct ModeRail: View {
 
     var body: some View {
         VStack(spacing: 4) {
-            Image("overprint-mark")
-                .resizable()
-                .scaledToFit()
-                .frame(width: 26, height: 26)
-                .padding(.top, 48)
-                .padding(.bottom, 14)
+            Button { model.closeSite() } label: {
+                Image("overprint-mark")
+                    .resizable()
+                    .scaledToFit()
+                    .frame(width: 34, height: 34)
+                    .contentShape(Rectangle())
+            }
+            .buttonStyle(.plain)
+            .help("Close this site and go back to the launch window")
+            .padding(.top, 44)
+            .padding(.bottom, 14)
 
             Rectangle()
                 .fill(Color.black.opacity(0.1))
