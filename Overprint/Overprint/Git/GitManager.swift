@@ -160,8 +160,20 @@ final class GitManager: ObservableObject {
         let publishIndex = info.sourceBranch != nil ? 2 : 1
         let doneIndex = publishIndex + 1
 
+        // Build into a directory private to this deploy, and publish that.
+        //
+        // `dist/` is shared with the preview builds driven by the file watcher and by autosave,
+        // which pass includeDrafts: true and which delete and recreate the directory rather than
+        // merging into it. Deploy awaits a source push between building and publishing, so
+        // publishing from `dist/` would let a rebuild landing in that window ship drafts.
+        let staging = FileManager.default.temporaryDirectory
+            .appendingPathComponent("overprint-deploy-\(UUID().uuidString)", isDirectory: true)
+
         do {
-            try await Self.run { try SiteBuilder().build(siteURL: site, includeDrafts: false) }
+            defer { try? FileManager.default.removeItem(at: staging) }
+            try await Self.run {
+                try SiteBuilder().build(siteURL: site, outputURL: staging, includeDrafts: false)
+            }
             setStep(0, .done)
 
             if info.sourceBranch != nil {
@@ -172,11 +184,10 @@ final class GitManager: ObservableObject {
             setStep(publishIndex, .active)
 
             let cname = Self.customDomain(from: info.url)
-            let dist = site.appendingPathComponent("dist")
             let protectedSource = Set([info.sourceBranch].compactMap { $0?.lowercased() })
             try await Self.run {
                 try GitDeploy().publish(
-                    distURL: dist,
+                    distURL: staging,
                     remote: remote,
                     branch: branch,
                     cname: cname,
