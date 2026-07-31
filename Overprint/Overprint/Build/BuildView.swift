@@ -9,6 +9,7 @@ struct BuildView: View {
     @ObservedObject var ai: AIManager
 
     private let scrollAnchor = "op-transcript-bottom"
+    @AppStorage("pane.assistantWidth") private var assistantWidth: Double = PaneWidth.assistantDefault
 
     private let suggestions: [(label: String, prompt: String)] = [
         ("A minimal personal blog", "Build a minimal personal blog with an editorial theme and dark mode."),
@@ -17,9 +18,13 @@ struct BuildView: View {
     ]
 
     var body: some View {
-        HStack(spacing: 0) {
+        HSplitView {
             assistantPane
+                .frame(width: assistantWidth)
+                .frame(minWidth: PaneWidth.assistantMin, maxWidth: PaneWidth.assistantMax)
+                .background(WidthReader { assistantWidth = $0 })
             previewPane
+                .frame(minWidth: PaneWidth.previewMin, maxWidth: .infinity)
         }
     }
 
@@ -54,7 +59,8 @@ struct BuildView: View {
 
             composer
         }
-        .frame(width: 432)
+        // Width comes from the enclosing HSplitView so the divider can move it.
+        .frame(maxWidth: .infinity)
         .background(OPColor.surface)
         .overlay(alignment: .trailing) { Rectangle().fill(OPColor.hairline).frame(width: 1) }
     }

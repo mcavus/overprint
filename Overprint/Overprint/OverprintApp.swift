@@ -23,7 +23,9 @@ struct OverprintApp: App {
                 .onAppear { AppDelegate.reopenMainWindow = { openWindow(id: Self.mainWindowID) } }
         }
         .windowStyle(.hiddenTitleBar)
-        .windowResizability(.contentSize)
+        // .contentSize pins the window to its content's fixed frame, which also greys out zoom and
+        // full screen. The content now states a minimum instead, so the window is free above it.
+        .windowResizability(.contentMinSize)
         .commands {
             CommandGroup(after: .appInfo) {
                 Button("Check for Updates…") { updater.checkForUpdates() }

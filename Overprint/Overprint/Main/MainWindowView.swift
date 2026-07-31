@@ -15,7 +15,8 @@ struct MainWindowView: View {
                 BottomBar(server: model.serverManager)
             }
         }
-        .frame(width: 1160, height: 724)
+        .frame(minWidth: 900, idealWidth: 1160, maxWidth: .infinity,
+               minHeight: 560, idealHeight: 724, maxHeight: .infinity)
         .background(OPColor.surface)
     }
 

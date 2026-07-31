@@ -41,7 +41,8 @@ struct PostsListView: View {
                 .padding(8)
             }
         }
-        .frame(width: 248)
+        // Width comes from the enclosing HSplitView so the divider can move it.
+        .frame(maxWidth: .infinity)
         .background(OPColor.surface2)
         .overlay(alignment: .trailing) { Rectangle().fill(OPColor.hairline).frame(width: 1) }
     }

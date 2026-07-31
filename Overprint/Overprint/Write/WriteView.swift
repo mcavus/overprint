@@ -10,6 +10,7 @@ struct WriteView: View {
     private enum Pane { case edit, preview }
     @State private var pane: Pane = .edit
     @State private var askOpen = false
+    @AppStorage("pane.postsWidth") private var postsWidth: Double = PaneWidth.postsDefault
 
     private var previewURL: URL? {
         guard server.isServing, let base = server.url, let slug = model.selectedPost?.post.slug else { return nil }
@@ -17,12 +18,18 @@ struct WriteView: View {
     }
 
     var body: some View {
-        HStack(spacing: 0) {
+        HSplitView {
             PostsListView(model: model)
+                .frame(width: postsWidth)
+                .frame(minWidth: PaneWidth.postsMin, maxWidth: PaneWidth.postsMax)
+                // HSplitView reports the new width through the layout, not through a binding, so
+                // read it back on change and persist it. Without this the drag is forgotten.
+                .background(WidthReader { postsWidth = $0 })
             VStack(spacing: 0) {
                 header
                 editorAndPreview
             }
+            .frame(minWidth: PaneWidth.editorMin + PaneWidth.previewMin, maxWidth: .infinity)
         }
     }
 
@@ -103,16 +110,18 @@ struct WriteView: View {
         .buttonStyle(.plain)
     }
 
-    private var editorAndPreview: some View {
-        HStack(spacing: 0) {
-            if pane == .edit {
+    @ViewBuilder private var editorAndPreview: some View {
+        if pane == .edit {
+            HSplitView {
                 MarkdownEditor(text: $model.editorText, onEdit: model.userDidEdit)
-                    .frame(maxWidth: .infinity, maxHeight: .infinity)
-                    .overlay(alignment: .trailing) { Rectangle().fill(OPColor.hairline).frame(width: 1) }
+                    .frame(minWidth: PaneWidth.editorMin, maxWidth: .infinity, maxHeight: .infinity)
+                previewPane
+                    .frame(minWidth: PaneWidth.previewMin, maxWidth: .infinity)
             }
-            previewPane
+            .frame(maxWidth: .infinity, maxHeight: .infinity)
+        } else {
+            previewPane.frame(maxWidth: .infinity, maxHeight: .infinity)
         }
-        .frame(maxWidth: .infinity, maxHeight: .infinity)
     }
 
     @ViewBuilder private var previewPane: some View {
