@@ -11,6 +11,7 @@ struct WriteView: View {
     @State private var pane: Pane = .edit
     @State private var askOpen = false
     @AppStorage("pane.postsWidth") private var postsWidth: Double = PaneWidth.postsDefault
+    @AppStorage("pane.editorFraction") private var editorFraction: Double = 0.5
 
     private var previewURL: URL? {
         guard server.isServing, let base = server.url, let slug = model.selectedPost?.post.slug else { return nil }
@@ -18,18 +19,15 @@ struct WriteView: View {
     }
 
     var body: some View {
-        HSplitView {
+        HStack(spacing: 0) {
             PostsListView(model: model)
-                .frame(width: postsWidth)
-                .frame(minWidth: PaneWidth.postsMin, maxWidth: PaneWidth.postsMax)
-                // HSplitView reports the new width through the layout, not through a binding, so
-                // read it back on change and persist it. Without this the drag is forgotten.
-                .background(WidthReader { postsWidth = $0 })
+                .frame(width: PaneWidth.clamp(postsWidth, to: PaneWidth.postsRange))
+            PaneDivider(width: $postsWidth, range: PaneWidth.postsRange)
             VStack(spacing: 0) {
                 header
                 editorAndPreview
             }
-            .frame(minWidth: PaneWidth.editorMin + PaneWidth.previewMin, maxWidth: .infinity)
+            .frame(maxWidth: .infinity)
         }
     }
 
@@ -112,16 +110,34 @@ struct WriteView: View {
 
     @ViewBuilder private var editorAndPreview: some View {
         if pane == .edit {
-            HSplitView {
-                MarkdownEditor(text: $model.editorText, onEdit: model.userDidEdit)
-                    .frame(minWidth: PaneWidth.editorMin, maxWidth: .infinity, maxHeight: .infinity)
-                previewPane
-                    .frame(minWidth: PaneWidth.previewMin, maxWidth: .infinity)
+            // Split by fraction rather than a fixed width, so resizing the window keeps the
+            // editor and preview in proportion instead of giving every new pixel to one side.
+            GeometryReader { proxy in
+                let total = proxy.size.width
+                let editor = editorWidth(in: total)
+                HStack(spacing: 0) {
+                    MarkdownEditor(text: $model.editorText, onEdit: model.userDidEdit)
+                        .frame(width: editor)
+                    PaneDivider(
+                        width: Binding(
+                            get: { editorWidth(in: total) },
+                            set: { editorFraction = min(max($0 / max(total, 1), 0.15), 0.85) }
+                        ),
+                        range: PaneWidth.editorMin...max(PaneWidth.editorMin, total - PaneWidth.previewMin)
+                    )
+                    previewPane.frame(maxWidth: .infinity)
+                }
             }
             .frame(maxWidth: .infinity, maxHeight: .infinity)
         } else {
             previewPane.frame(maxWidth: .infinity, maxHeight: .infinity)
         }
+    }
+
+    private func editorWidth(in total: Double) -> Double {
+        let ideal = total * editorFraction
+        let upper = max(PaneWidth.editorMin, total - PaneWidth.previewMin)
+        return min(max(ideal, PaneWidth.editorMin), upper)
     }
 
     @ViewBuilder private var previewPane: some View {

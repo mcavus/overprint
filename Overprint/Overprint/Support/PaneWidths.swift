@@ -1,18 +1,22 @@
 import SwiftUI
 
-/// Remembered widths for the resizable panes.
-///
-/// `HSplitView` does not persist its divider positions, so without this every launch resets the
-/// layout to the defaults and any adjustment has to be made again.
+/// Remembered widths for the resizable panes, and the limits they move between.
 enum PaneWidth {
-    static let postsDefault: Double = 248
-    static let postsMin: Double = 180
-    static let postsMax: Double = 420
+    /// The posts list is a table of contents, not a workspace: it should take as little as it can
+    /// while staying readable, leaving the room to the editor and the preview.
+    static let postsDefault: Double = 214
+    static let postsRange: ClosedRange<Double> = 170...360
 
-    static let assistantDefault: Double = 432
-    static let assistantMin: Double = 320
-    static let assistantMax: Double = 720
+    static let assistantDefault: Double = 400
+    static let assistantRange: ClosedRange<Double> = 320...640
 
-    static let editorMin: Double = 320
-    static let previewMin: Double = 280
+    static let editorMin: Double = 300
+    static let previewMin: Double = 260
+
+    /// `@AppStorage` returns whatever is on disk without consulting the range, and the range can
+    /// change between versions. Clamp on read rather than writing a correction back, so reading a
+    /// width stays free of side effects.
+    static func clamp(_ value: Double, to range: ClosedRange<Double>) -> Double {
+        min(max(value, range.lowerBound), range.upperBound)
+    }
 }

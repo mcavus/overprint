@@ -28,13 +28,12 @@ struct BuildView: View {
     }
 
     var body: some View {
-        HSplitView {
+        HStack(spacing: 0) {
             assistantPane
-                .frame(width: assistantWidth)
-                .frame(minWidth: PaneWidth.assistantMin, maxWidth: PaneWidth.assistantMax)
-                .background(WidthReader { assistantWidth = $0 })
+                .frame(width: PaneWidth.clamp(assistantWidth, to: PaneWidth.assistantRange))
+            PaneDivider(width: $assistantWidth, range: PaneWidth.assistantRange)
             previewPane
-                .frame(minWidth: PaneWidth.previewMin, maxWidth: .infinity)
+                .frame(maxWidth: .infinity)
         }
     }
 
