@@ -30,9 +30,12 @@ struct PostsListView: View {
             ScrollView {
                 VStack(spacing: 2) {
                     ForEach(model.posts, id: \.sourceURL) { loaded in
-                        PostRow(loaded: loaded, selected: loaded.sourceURL == model.selectedURL) {
-                            model.select(loaded.sourceURL)
-                        }
+                        PostRow(
+                            loaded: loaded,
+                            selected: loaded.sourceURL == model.selectedURL,
+                            action: { model.select(loaded.sourceURL) },
+                            onDelete: { model.deletePost(loaded.sourceURL) }
+                        )
                     }
                 }
                 .padding(8)
@@ -48,6 +51,7 @@ private struct PostRow: View {
     let loaded: LoadedPost
     let selected: Bool
     let action: () -> Void
+    let onDelete: () -> Void
 
     @State private var hovering = false
     private var draft: Bool { loaded.post.draft }
@@ -78,6 +82,23 @@ private struct PostRow: View {
         }
         .buttonStyle(.plain)
         .onHover { hovering = $0 }
+        .overlay(alignment: .trailing) {
+            if hovering {
+                Button(action: onDelete) {
+                    Image(systemName: "trash")
+                        .font(.system(size: 12))
+                        .foregroundStyle(OPColor.textMuted)
+                        .frame(width: 24, height: 24)
+                        .contentShape(Rectangle())
+                }
+                .buttonStyle(.plain)
+                .help("Move this post to the Trash")
+                .padding(.trailing, 8)
+            }
+        }
+        .contextMenu {
+            Button("Move to Trash", role: .destructive, action: onDelete)
+        }
     }
 
     private var background: Color {

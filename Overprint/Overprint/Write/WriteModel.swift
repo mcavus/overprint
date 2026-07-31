@@ -110,6 +110,35 @@ final class WriteModel: ObservableObject {
         }
     }
 
+    /// Moves a post to the Trash and rebuilds.
+    ///
+    /// Trash rather than delete: a misclick here would otherwise destroy writing that exists
+    /// nowhere else. If the post being removed is the open one, the pending autosave is cancelled
+    /// first, or it would recreate the file moments after it disappeared.
+    func deletePost(_ url: URL) {
+        if url == selectedURL {
+            autosaveWork?.cancel()
+            autosaveWork = nil
+            isDirty = false
+        } else if isDirty {
+            saveNow()
+        }
+
+        do {
+            try FileManager.default.trashItem(at: url, resultingItemURL: nil)
+        } catch {
+            lastError = "Could not delete \(url.lastPathComponent): \(error.localizedDescription)"
+            return
+        }
+
+        if url == selectedURL { selectedURL = nil }
+        refreshPosts()
+        // refreshPosts adopts a new selection when the old one is gone; if the site is now empty
+        // it leaves selectedURL nil, and the editor has to be cleared to match.
+        if selectedURL == nil { editorText = "" }
+        rebuildAndReload()
+    }
+
     // MARK: Editing / autosave
 
     /// Called by the editor on a user edit (the buffer is already updated via the binding).
