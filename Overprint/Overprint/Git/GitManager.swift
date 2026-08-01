@@ -40,6 +40,9 @@ final class GitManager: ObservableObject {
     }
 
     @Published private(set) var connection = Connection()
+    /// What the next Commit would stage. Nil when it could not be computed, in which case the
+    /// sheet falls back to the connection's plain has-changes line.
+    @Published private(set) var pending: CommitPreview?
     @Published var commitPhase: Phase = .idle
     @Published var deployPhase: Phase = .idle
     @Published private(set) var deploySteps: [Step] = []
@@ -47,18 +50,21 @@ final class GitManager: ObservableObject {
     // MARK: Status
 
     func refresh(site: URL) async {
-        connection = await Self.compute {
+        let result = await Self.compute { () -> (Connection, CommitPreview?) in
             let git = GitDeploy()
             let status = git.status(siteURL: site)
             let url = (try? SiteStore(siteURL: site).loadConfig().url) ?? nil
-            return Connection(
+            let connection = Connection(
                 isRepository: status.isRepository,
                 hasChanges: status.hasChanges,
                 branch: status.branch,
                 repository: status.remoteURL,
                 url: url
             )
+            return (connection, try? CommitPreview.pending(siteURL: site))
         }
+        connection = result.0
+        pending = result.1
     }
 
     // MARK: Connect (one-time per site)

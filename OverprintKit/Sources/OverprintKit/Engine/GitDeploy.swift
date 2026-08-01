@@ -162,6 +162,85 @@ public struct GitDeploy: Sendable {
         try run(["push", "--force", remote, "\(target):\(target)"], in: temp)
     }
 
+    // MARK: Pending changes
+
+    /// One file a commit would stage.
+    struct PendingChange: Equatable, Sendable {
+        var path: String
+        var change: CommitPreview.File.Change
+    }
+
+    /// Reports what `commit` would stage, without modifying the site or its repository.
+    func pendingChanges(siteURL: URL) throws -> [PendingChange] {
+        let statusArgs = ["status", "--porcelain", "-z", "--untracked-files=all"]
+        let gitignoreURL = siteURL.appendingPathComponent(".gitignore")
+        let existing = (try? String(contentsOf: gitignoreURL, encoding: .utf8)) ?? ""
+        let pendingIgnore = Self.gitignoreText(existing: existing)
+
+        var result: [PendingChange]
+        if isRepository(siteURL) {
+            result = Self.parsePorcelainZ(try runRaw(statusArgs, in: siteURL))
+        } else {
+            // Commit would `git init` here first. Borrow an empty repository in the temp directory
+            // so the scan writes nothing into the site, and name its git dir explicitly: a site
+            // sitting inside another repository would otherwise make git walk up and report that
+            // parent's changes. Seeding the probe's info/exclude with the .gitignore commit is
+            // about to write leaves the exclusion rules to git rather than to a matcher of our own.
+            let fm = FileManager.default
+            let probe = fm.temporaryDirectory.appendingPathComponent("op-preview-\(UUID().uuidString)")
+            try fm.createDirectory(at: probe, withIntermediateDirectories: true)
+            defer { try? fm.removeItem(at: probe) }
+            try run(["init", "-q"], in: probe)
+            if let pendingIgnore {
+                try pendingIgnore.write(to: probe.appendingPathComponent(".git/info/exclude"),
+                                        atomically: true, encoding: .utf8)
+            }
+            let args = ["--git-dir", probe.appendingPathComponent(".git").path,
+                        "--work-tree", siteURL.path] + statusArgs
+            result = Self.parsePorcelainZ(try runRaw(args, in: siteURL))
+        }
+
+        // Commit writes .gitignore itself before staging, so the preview must not omit it. Guarded
+        // because the scan already lists it when the file exists but is untracked or modified.
+        if pendingIgnore != nil, !result.contains(where: { $0.path == ".gitignore" }) {
+            let exists = FileManager.default.fileExists(atPath: gitignoreURL.path)
+            result.append(PendingChange(path: ".gitignore", change: exists ? .modified : .added))
+        }
+        return result
+    }
+
+    /// Parses `git status --porcelain -z`. The NUL form is what makes this safe: paths are never
+    /// C-quoted, so a name with a space survives. A rename carries a second field with the original
+    /// path (new path first, the reverse of the human-readable form) that has to be consumed, or
+    /// every following entry shifts by one.
+    static func parsePorcelainZ(_ output: String) -> [PendingChange] {
+        let fields = output.split(separator: "\0", omittingEmptySubsequences: true).map(String.init)
+        var result: [PendingChange] = []
+        var index = 0
+        while index < fields.count {
+            let entry = fields[index]
+            index += 1
+            guard entry.count > 3 else { continue }
+            let code = String(entry.prefix(2))
+            if code.contains("R") || code.contains("C") { index += 1 }
+            guard let change = Self.change(for: code) else { continue }
+            result.append(PendingChange(path: String(entry.dropFirst(3)), change: change))
+        }
+        return result
+    }
+
+    private static func change(for code: String) -> CommitPreview.File.Change? {
+        if code == "??" { return .added }
+        // Added to the index and then deleted from the working tree: `add -A` drops it again, so
+        // the commit would carry nothing for it.
+        if code == "AD" { return nil }
+        let letters = code.filter { $0 != " " }
+        if letters.contains("R") || letters.contains("C") { return .renamed }
+        if letters.contains("D") { return .deleted }
+        if letters.contains("A") { return .added }
+        return .modified
+    }
+
     // MARK: Plumbing
 
     private var identityArgs: [String] {
@@ -169,11 +248,18 @@ public struct GitDeploy: Sendable {
         return ["-c", "user.name=\(author.name)", "-c", "user.email=\(author.email)"]
     }
 
+    /// The `.gitignore` text `commit` would leave behind, or nil when the file already covers what
+    /// Overprint manages. Shared with the commit preview so the preview cannot drift from the file
+    /// commit actually writes.
+    static func gitignoreText(existing: String) -> String? {
+        guard !existing.contains("dist/") else { return nil }
+        return existing.isEmpty ? "dist/\n.DS_Store\n" : existing + "\ndist/\n"
+    }
+
     private func ensureGitignore(_ siteURL: URL) throws {
         let url = siteURL.appendingPathComponent(".gitignore")
         let existing = (try? String(contentsOf: url, encoding: .utf8)) ?? ""
-        guard !existing.contains("dist/") else { return }
-        let updated = existing.isEmpty ? "dist/\n.DS_Store\n" : existing + "\ndist/\n"
+        guard let updated = Self.gitignoreText(existing: existing) else { return }
         try updated.write(to: url, atomically: true, encoding: .utf8)
     }
 
@@ -189,6 +275,14 @@ public struct GitDeploy: Sendable {
     /// `.failed` with the output on a non-zero exit.
     @discardableResult
     private func run(_ args: [String], in dir: URL) throws -> String {
+        try runRaw(args, in: dir).trimmingCharacters(in: .whitespacesAndNewlines)
+    }
+
+    /// Runs git and returns its combined output untrimmed.
+    ///
+    /// `status --porcelain -z` output cannot be trimmed: an entry for an unstaged change begins
+    /// with a space (" M content/posts/x.md"), so trimming shifts every path by one character.
+    private func runRaw(_ args: [String], in dir: URL) throws -> String {
         guard let git = Self.gitBinary() else { throw GitError.gitNotFound }
         let process = Process()
         process.executableURL = URL(fileURLWithPath: git)
@@ -214,8 +308,10 @@ public struct GitDeploy: Sendable {
         let data = pipe.fileHandleForReading.readDataToEndOfFile()
         process.waitUntilExit()
 
-        let output = String(data: data, encoding: .utf8)?.trimmingCharacters(in: .whitespacesAndNewlines) ?? ""
-        if process.terminationStatus != 0 { throw GitError.failed(output) }
+        let output = String(data: data, encoding: .utf8) ?? ""
+        if process.terminationStatus != 0 {
+            throw GitError.failed(output.trimmingCharacters(in: .whitespacesAndNewlines))
+        }
         return output
     }
 }

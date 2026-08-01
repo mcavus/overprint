@@ -9,6 +9,19 @@ public struct FrontmatterParser {
 
     /// Splits raw file content into the frontmatter YAML block and the Markdown body.
     /// Returns `nil` YAML if the file does not begin with a `---` fence.
+    /// Reads just `draft` and `title`, without validating the rest of the contract.
+    ///
+    /// A post whose required fields are broken still has to report its draft flag: the commit
+    /// preview exists to warn before the text is pushed, and a post that fails validation is
+    /// exactly when that matters. Nothing read here ever becomes a filename, which is why it can
+    /// skip `slugIssue`.
+    static func draftAndTitle(inRaw raw: String) -> (isDraft: Bool, title: String?) {
+        let (yaml, _) = FrontmatterParser().split(raw)
+        guard let yaml, let dict = (try? Yams.load(yaml: yaml)) as? [String: Any] else { return (false, nil) }
+        let title = (dict["title"] as? String)?.trimmingCharacters(in: .whitespacesAndNewlines)
+        return ((dict["draft"] as? Bool) ?? false, (title?.isEmpty == false) ? title : nil)
+    }
+
     public func split(_ raw: String) -> (yaml: String?, body: String) {
         let normalized = raw.replacingOccurrences(of: "\r\n", with: "\n")
         let lines = normalized.components(separatedBy: "\n")

@@ -1,4 +1,5 @@
 import SwiftUI
+import OverprintKit
 
 /// Commit the site's source with a message. When the site is connected to GitHub, this also pushes.
 /// There is no repository to enter: it uses the one the site remembers.
@@ -11,7 +12,9 @@ struct CommitSheet: View {
 
     @State private var message = ""
 
-    private var hasWork: Bool { !git.connection.isRepository || git.connection.hasChanges }
+    private var hasWork: Bool {
+        !git.connection.isRepository || (git.pending.map { !$0.isEmpty } ?? git.connection.hasChanges)
+    }
 
     private var canCommit: Bool {
         guard git.commitPhase != .working else { return false }
@@ -31,6 +34,8 @@ struct CommitSheet: View {
                 .font(OPFont.mono(11.5))
                 .foregroundStyle(OPColor.textFaint)
                 .fixedSize(horizontal: false, vertical: true)
+
+            fileList
 
             TextField("Message (e.g. Add a new post)", text: $message, axis: .vertical)
                 .textFieldStyle(.plain)
@@ -76,9 +81,93 @@ struct CommitSheet: View {
             }
         }
         .padding(18)
-        .frame(width: 380)
+        .frame(width: 440)
         .task { await git.refresh(site: site) }
         .onDisappear { git.resetCommit() }
+    }
+
+    /// What the commit is about to send, with drafts flagged.
+    ///
+    /// A draft is left out of the built site, but its Markdown still goes into the repository, and
+    /// on a public repo that text is readable.
+    @ViewBuilder private var fileList: some View {
+        if let pending = git.pending, !pending.isEmpty {
+            VStack(alignment: .leading, spacing: 6) {
+                HStack(spacing: 6) {
+                    Text("\(pending.files.count) file\(pending.files.count == 1 ? "" : "s")")
+                        .foregroundStyle(OPColor.textFaint)
+                    if !pending.drafts.isEmpty {
+                        Text("·").foregroundStyle(OPColor.textFainter)
+                        Text("\(pending.drafts.count) draft\(pending.drafts.count == 1 ? "" : "s")")
+                            .foregroundStyle(OPColor.ink)
+                    }
+                    Spacer()
+                }
+                .font(OPFont.mono(11))
+
+                ScrollView {
+                    VStack(alignment: .leading, spacing: 3) {
+                        ForEach(visibleFiles(pending)) { file in
+                            fileRow(file)
+                        }
+                        if let hidden = hiddenCount(pending) {
+                            Text("+ \(hidden) more file\(hidden == 1 ? "" : "s")")
+                                .font(OPFont.mono(11))
+                                .foregroundStyle(OPColor.textFainter)
+                                .padding(.top, 2)
+                        }
+                    }
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                    .padding(8)
+                }
+                .frame(maxHeight: 168)
+                .overlay(RoundedRectangle(cornerRadius: 8).strokeBorder(Color.black.opacity(0.10)))
+
+                if !pending.drafts.isEmpty {
+                    Text("Drafts are committed as source. Deploy leaves them off the published site.")
+                        .font(OPFont.ui(11))
+                        .foregroundStyle(OPColor.textFainter)
+                        .fixedSize(horizontal: false, vertical: true)
+                }
+            }
+        }
+    }
+
+    private func fileRow(_ file: CommitPreview.File) -> some View {
+        HStack(spacing: 7) {
+            Text(file.change.rawValue)
+                .font(OPFont.mono(11))
+                .foregroundStyle(OPColor.textFainter)
+                .frame(width: 58, alignment: .leading)
+            if file.isDraft {
+                Text("DRAFT")
+                    .font(OPFont.mono(9, weight: .semibold))
+                    .tracking(0.5)
+                    .foregroundStyle(OPColor.textSecondary)
+                    .padding(.horizontal, 5)
+                    .padding(.vertical, 1)
+                    .overlay(RoundedRectangle(cornerRadius: 4).strokeBorder(Color.black.opacity(0.18)))
+            }
+            Text(file.title ?? file.path)
+                .font(OPFont.mono(11.5))
+                .foregroundStyle(file.isDraft ? OPColor.ink : OPColor.textSecondary)
+                .lineLimit(1)
+                .truncationMode(.middle)
+            Spacer(minLength: 0)
+        }
+        .help(file.path)
+    }
+
+    /// Every draft, plus a bounded number of the rest. Drafts sort first in the preview, so the
+    /// flagged rows are never the ones the cap drops.
+    private func visibleFiles(_ pending: CommitPreview) -> [CommitPreview.File] {
+        let limit = max(pending.drafts.count + 10, 12)
+        return Array(pending.files.prefix(limit))
+    }
+
+    private func hiddenCount(_ pending: CommitPreview) -> Int? {
+        let shown = visibleFiles(pending).count
+        return pending.files.count > shown ? pending.files.count - shown : nil
     }
 
     private var actionTitle: String {
