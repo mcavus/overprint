@@ -103,6 +103,7 @@ final class AppModel: ObservableObject {
         watcher?.stop()
         watcher = nil
         writeModel?.saveNow()
+        writeModel?.settleFilename()
         serverManager.stop()
         writeModel = nil
         buildModel = nil

@@ -27,6 +27,51 @@ public struct PostWriter {
     }
 
     /// Writes `content/posts/YYYY-MM-DD-slug.md` with a starter frontmatter block, choosing a
+    /// Renames a post file to match its own frontmatter, returning the new URL when it moved.
+    ///
+    /// A post created before its title exists is named `<date>-untitled.md`, and nothing renamed it
+    /// when the title was filled in, so the filename, the slug and the date could all disagree.
+    ///
+    /// Only a name that already carries a date prefix is settled. A post at `hello.md` is following
+    /// a looser convention that builds correctly, and `filenameDateIssue` deliberately does not even
+    /// warn about it, so renaming it would be a change nobody asked for. A destination that already
+    /// exists is left alone: two posts claiming one slug is a duplicate that `validate()` reports,
+    /// and moving one on top of the other would destroy writing.
+    @discardableResult
+    public func renameToMatchFrontmatter(_ fileURL: URL) throws -> URL? {
+        let filename = fileURL.lastPathComponent
+        guard Self.hasDatePrefix(filename) else { return nil }
+        guard let raw = try? String(contentsOf: fileURL, encoding: .utf8),
+              let parsed = try? FrontmatterParser().parse(raw, filename: filename)
+        else { return nil }
+
+        // `parse` rejects an unsafe slug already. Checked again because this is the second place a
+        // slug becomes a path on disk.
+        guard FrontmatterParser.slugIssue(parsed.0.slug) == nil else { return nil }
+
+        let wanted = "\(DateFormat.isoString(parsed.0.date))-\(parsed.0.slug).md"
+        guard wanted != filename else { return nil }
+        let destination = fileURL.deletingLastPathComponent().appendingPathComponent(wanted)
+        guard !FileManager.default.fileExists(atPath: destination.path) else { return nil }
+
+        do {
+            try FileManager.default.moveItem(at: fileURL, to: destination)
+        } catch {
+            throw OverprintError.io("could not rename \(filename): \(error.localizedDescription)")
+        }
+        return destination
+    }
+
+    /// Whether a filename opens with `YYYY-MM-DD-`.
+    static func hasDatePrefix(_ filename: String) -> Bool {
+        let parts = filename.split(separator: "-", maxSplits: 3, omittingEmptySubsequences: false)
+        guard parts.count == 4, parts[0].count == 4, parts[1].count == 2, parts[2].count == 2 else {
+            return false
+        }
+        return parts[0].allSatisfy(\.isNumber) && parts[1].allSatisfy(\.isNumber)
+            && parts[2].allSatisfy(\.isNumber) && !parts[3].isEmpty
+    }
+
     /// unique filename. Returns the created file's URL.
     @discardableResult
     public func createPost(

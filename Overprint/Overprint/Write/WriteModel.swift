@@ -92,6 +92,7 @@ final class WriteModel: ObservableObject {
     func select(_ url: URL) {
         guard url != selectedURL else { return }
         if isDirty { saveNow() }
+        settleFilename()
         selectedURL = url
         loadEditorFromDisk()
         reloadToken += 1
@@ -99,6 +100,7 @@ final class WriteModel: ObservableObject {
 
     func newPost() {
         if isDirty { saveNow() }
+        settleFilename()
         do {
             let url = try PostWriter().createPost(in: site, title: "Untitled")
             refreshPosts()
@@ -137,6 +139,22 @@ final class WriteModel: ObservableObject {
         // it leaves selectedURL nil, and the editor has to be cleared to match.
         if selectedURL == nil { editorText = "" }
         rebuildAndReload()
+    }
+
+    /// Renames the open post's file to match its frontmatter, once the user has moved off it.
+    ///
+    /// Only ever called when leaving a post, never from an edit or an autosave: a rename while the
+    /// caret is in the file would move it mid-word, and again on the next keystroke.
+    func settleFilename() {
+        guard let current = selectedURL else { return }
+        do {
+            if let moved = try PostWriter().renameToMatchFrontmatter(current) {
+                selectedURL = moved
+                refreshPosts()
+            }
+        } catch {
+            NSLog("Overprint: rename failed: \(error.localizedDescription)")
+        }
     }
 
     // MARK: Editing / autosave
