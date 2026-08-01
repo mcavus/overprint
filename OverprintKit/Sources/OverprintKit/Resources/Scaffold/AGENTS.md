@@ -89,6 +89,10 @@ title: Nothing here
 That page is not also emitted as an ordinary page: it becomes `404.html` and nothing else. Write it
 as you would any page. Leave it out and the built-in copy is used.
 
+`overprint serve` answers a missing address with this page too, so a 404 previews the way the host
+will serve it. On a project site the page's `<base href="/repo/">` points at the published address,
+so the local preview of it renders unstyled.
+
 One thing to know if you edit the template: the host serves this file without redirecting, so the
 browser stays on the address the visitor typed. Relative links would resolve against that address
 rather than the site root, so this page alone carries a `<base>` derived from `url` in

@@ -49,10 +49,11 @@ enum RSSFeed {
 
         return """
         <?xml version="1.0" encoding="UTF-8"?>
-        <rss version="2.0">
+        <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
           <channel>
             <title>\(escape(config.title))</title>
             <link>\(escape(base))</link>
+            <atom:link href="\(escape(SyndicationURL.absolute(base, "feed.xml")))" rel="self" type="application/rss+xml" />
             <description>\(escape(config.description))</description>
         \(items.joined(separator: "\n"))
           </channel>

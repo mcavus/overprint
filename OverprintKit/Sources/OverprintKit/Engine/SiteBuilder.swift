@@ -116,6 +116,8 @@ public struct SiteBuilder {
                 "tags": HTMLEscape.escape(post.tags),
                 "tag_links": tagLinks,
                 "draft": post.draft,
+                "page_kind": "post",
+                "page_url": HTMLEscape.escape(Self.pageURL(config.url, pageURL)),
                 "description": HTMLEscape.escape(Summary.text(for: loaded, using: renderer)),
                 "content_html": renderer.html(loaded.body),
             ]
@@ -131,6 +133,8 @@ public struct SiteBuilder {
             "theme": themeTokens,
             "nav": nav,
             "year": year,
+            "page_kind": "index",
+            "page_url": HTMLEscape.escape(Self.pageURL(config.url, "index.html")),
             "description": HTMLEscape.escape(config.description),
             "posts": summaries,
         ]
@@ -150,6 +154,8 @@ public struct SiteBuilder {
                 "title": HTMLEscape.escape(page.title),
                 "slug": HTMLEscape.escape(page.slug),
                 "draft": page.draft,
+                "page_kind": "page",
+                "page_url": HTMLEscape.escape(Self.pageURL(config.url, "\(page.slug).html")),
                 "description": HTMLEscape.escape(Summary.text(for: loaded, using: renderer)),
                 "content_html": renderer.html(loaded.body),
             ]
@@ -185,6 +191,8 @@ public struct SiteBuilder {
                 "nav": nav,
                 "year": year,
                 "tag": HTMLEscape.escape(entry.name),
+                "page_kind": "tag",
+                "page_url": HTMLEscape.escape(Self.pageURL(config.url, "tag-\(slug).html")),
                 "posts": entry.posts.map(summary),
             ]
             let rendered = try render(environment, name: "tag.html", context: context)
@@ -202,6 +210,8 @@ public struct SiteBuilder {
             "nav": nav,
             "year": year,
             "base_path": HTMLEscape.escape(Self.basePath(from: config.url)),
+            "page_kind": "404",
+            "page_url": HTMLEscape.escape(Self.pageURL(config.url, "404.html")),
             "title": HTMLEscape.escape(notFoundPage?.page.title ?? "Page not found"),
             "content_html": notFoundPage.map { renderer.html($0.body) } ?? Self.defaultNotFoundHTML,
         ]
@@ -275,6 +285,14 @@ public struct SiteBuilder {
     }
 
     static let staticDirName = "static"
+
+    /// The page's own absolute address, for a theme that wants to emit a canonical link or an
+    /// og:url. Empty when `overprint.yml` has no `url`, since there is nothing to be absolute
+    /// against and a relative canonical is worse than none.
+    private static func pageURL(_ configURL: String?, _ file: String) -> String {
+        guard let configURL, !configURL.isEmpty else { return "" }
+        return SyndicationURL.absolute(SyndicationURL.base(configURL), file)
+    }
 
     private func render(_ environment: Environment, name: String, context: [String: Any]) throws -> String {
         do {

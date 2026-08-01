@@ -90,7 +90,7 @@ private func makeSite(url: String? = nil) throws -> URL {
     try SiteBuilder().build(siteURL: site, outputURL: out, includeDrafts: true)
 
     let feed = try String(contentsOf: out.appendingPathComponent("feed.xml"), encoding: .utf8)
-    #expect(feed.contains("<rss version=\"2.0\">"))
+    #expect(feed.contains("<rss version=\"2.0\" xmlns:atom="))
     #expect(feed.contains("<title>Test Blog</title>"))
     #expect(feed.contains("<title>Alpha</title>"))
     #expect(feed.contains("<title>Beta</title>"))

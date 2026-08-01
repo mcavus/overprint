@@ -74,11 +74,23 @@ public final class PreviewServer {
               !isDirectory.boolValue,
               let data = FileManager.default.contents(atPath: fileURL.path)
         else {
-            return .notFound
+            return notFoundResponse(base: base)
         }
 
         let contentType = mimeType(forExtension: fileURL.pathExtension)
         return .raw(200, "OK", ["Content-Type": contentType], { writer in
+            try? writer.write(data)
+        })
+    }
+
+    /// The site's own 404 page, so a missing address previews the way the host will serve it.
+    ///
+    /// The status stays 404: a preview that answered 200 would hide a broken link rather than show
+    /// it. Falls back to a bare 404 when the build has not produced the page yet.
+    static func notFoundResponse(base: URL) -> HttpResponse {
+        let page = base.appendingPathComponent("404.html")
+        guard let data = FileManager.default.contents(atPath: page.path) else { return .notFound }
+        return .raw(404, "Not Found", ["Content-Type": mimeType(forExtension: "html")], { writer in
             try? writer.write(data)
         })
     }
