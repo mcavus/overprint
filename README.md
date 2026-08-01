@@ -186,7 +186,9 @@ The Markdown body starts here.
 
 `title` and a valid `date` are required. `slug` falls back to the filename with the date prefix stripped, `tags` defaults to empty, and `draft` defaults to `false`. These five names will not change, so a script or an agent can count on them.
 
-Standalone pages live at `content/pages/<slug>.md` with only a `title` (plus optional `slug` and `draft`). Pages have no date and no tags, so they never appear in the post list, the feed, or tag pages.
+An optional `description` sets the summary used in the index listing, the feed, and the page's meta description. Without it the first paragraph is used.
+
+Standalone pages live at `content/pages/<slug>.md` with only a `title` (plus optional `slug`, `draft`, and `description`). Pages have no date and no tags, so they never appear in the post list, the feed, or tag pages.
 
 ## Build output
 

@@ -27,11 +27,17 @@ public struct MarkdownRenderer {
     private func plainText(_ markup: Markup) -> String {
         if let text = markup as? Text { return text.string }
         if let code = markup as? InlineCode { return code.code }
+        // A break is a childless leaf, so recursing into it yields nothing and glues the words on
+        // either side together. A wrapped paragraph is the common case, not an edge case.
+        if markup is SoftBreak || markup is LineBreak { return " " }
         return markup.children.map(plainText).joined()
     }
 
     static func truncate(_ string: String, limit: Int) -> String {
-        let trimmed = string.trimmingCharacters(in: .whitespacesAndNewlines)
+        // A crawler stores a meta description verbatim, so runs of whitespace are collapsed rather
+        // than passed through into the attribute.
+        let collapsed = string.split(whereSeparator: \.isWhitespace).joined(separator: " ")
+        let trimmed = collapsed.trimmingCharacters(in: .whitespacesAndNewlines)
         guard trimmed.count > limit else { return trimmed }
         let end = trimmed.index(trimmed.startIndex, offsetBy: limit)
         return trimmed[..<end].trimmingCharacters(in: .whitespaces) + "…"

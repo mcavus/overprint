@@ -9,11 +9,14 @@ public struct Page: Equatable, Sendable {
     public var title: String
     public var slug: String
     public var draft: Bool
+    /// Optional override for the page's meta description.
+    public var description: String?
 
-    public init(title: String, slug: String, draft: Bool = false) {
+    public init(title: String, slug: String, draft: Bool = false, description: String? = nil) {
         self.title = title
         self.slug = slug
         self.draft = draft
+        self.description = description
     }
 }
 

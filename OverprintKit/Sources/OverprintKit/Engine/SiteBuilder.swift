@@ -90,7 +90,7 @@ public struct SiteBuilder {
                 "dateDisplay": DateFormat.displayString(post.date),
                 "tags": HTMLEscape.escape(post.tags),
                 "draft": post.draft,
-                "excerpt": HTMLEscape.escape(renderer.excerpt(loaded.body)),
+                "excerpt": HTMLEscape.escape(Summary.text(for: loaded, using: renderer)),
             ]
         }
 
@@ -116,6 +116,7 @@ public struct SiteBuilder {
                 "tags": HTMLEscape.escape(post.tags),
                 "tag_links": tagLinks,
                 "draft": post.draft,
+                "description": HTMLEscape.escape(Summary.text(for: loaded, using: renderer)),
                 "content_html": renderer.html(loaded.body),
             ]
             let rendered = try render(environment, name: "post.html", context: context)
@@ -130,6 +131,7 @@ public struct SiteBuilder {
             "theme": themeTokens,
             "nav": nav,
             "year": year,
+            "description": HTMLEscape.escape(config.description),
             "posts": summaries,
         ]
         let indexHTML = try render(environment, name: "index.html", context: indexContext)
@@ -148,6 +150,7 @@ public struct SiteBuilder {
                 "title": HTMLEscape.escape(page.title),
                 "slug": HTMLEscape.escape(page.slug),
                 "draft": page.draft,
+                "description": HTMLEscape.escape(Summary.text(for: loaded, using: renderer)),
                 "content_html": renderer.html(loaded.body),
             ]
             let rendered = try render(environment, name: "page.html", context: context)

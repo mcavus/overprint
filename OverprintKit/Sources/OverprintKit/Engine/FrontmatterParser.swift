@@ -85,7 +85,8 @@ public struct FrontmatterParser {
             throw OverprintError.postValidation(file: filename, issues: issues)
         }
 
-        let post = Post(title: title!, date: date!, tags: tags, slug: slug, draft: draft)
+        let post = Post(title: title!, date: date!, tags: tags, slug: slug, draft: draft,
+                        description: Self.optionalString(dict["description"]))
         return (post, body)
     }
 
@@ -119,7 +120,8 @@ public struct FrontmatterParser {
         }
         let draft = (dict["draft"] as? Bool) ?? false
 
-        return (Page(title: title, slug: slug, draft: draft), body)
+        return (Page(title: title, slug: slug, draft: draft,
+                     description: Self.optionalString(dict["description"])), body)
     }
 
     /// Rejects a slug that could escape the output directory or collide with the filesystem.
@@ -172,6 +174,14 @@ public struct FrontmatterParser {
     }
 
     /// Accepts a YAML list of strings, or a comma-separated string, as tags.
+    /// An optional free-text field. A wrong type is ignored rather than reported, matching how
+    /// `tags` and `draft` already tolerate one.
+    static func optionalString(_ value: Any?) -> String? {
+        guard let string = value as? String else { return nil }
+        let trimmed = string.trimmingCharacters(in: .whitespacesAndNewlines)
+        return trimmed.isEmpty ? nil : trimmed
+    }
+
     static func stringArray(_ value: Any?) -> [String] {
         if let array = value as? [Any] {
             return array.compactMap { $0 as? String }

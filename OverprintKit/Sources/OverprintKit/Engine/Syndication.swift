@@ -42,7 +42,7 @@ enum RSSFeed {
                   <link>\(escape(link))</link>
                   <guid isPermaLink="\(isPermaLink)">\(escape(link))</guid>
                   <pubDate>\(DateFormat.rfc822String(post.date))</pubDate>
-                  <description>\(escape(renderer.excerpt(loaded.body)))</description>
+                  <description>\(escape(Summary.text(for: loaded, using: renderer)))</description>
                 </item>
             """)
         }

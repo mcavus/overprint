@@ -10,19 +10,24 @@ public struct Post: Equatable, Sendable {
     public var tags: [String]
     public var slug: String
     public var draft: Bool
+    /// Optional override for the summary shown in listings, the feed, and the page's meta
+    /// description. Absent means the first paragraph is used.
+    public var description: String?
 
     public init(
         title: String,
         date: Date,
         tags: [String] = [],
         slug: String,
-        draft: Bool = false
+        draft: Bool = false,
+        description: String? = nil
     ) {
         self.title = title
         self.date = date
         self.tags = tags
         self.slug = slug
         self.draft = draft
+        self.description = description
     }
 }
 

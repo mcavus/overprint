@@ -33,6 +33,7 @@ date: 2026-07-20
 tags: [writing, process]
 slug: writing-in-the-open
 draft: false
+description: An optional one-line summary.
 ---
 ```
 
@@ -42,6 +43,8 @@ draft: false
 - `slug` (string) is the output filename, `<slug>.html`. If omitted it is derived from the
   filename by stripping the date prefix. Keep it in sync with the filename.
 - `draft` (boolean) defaults to `false` when absent.
+- `description` (string, optional) is the summary used in the index listing, the RSS feed, and the
+  page's `<meta name="description">`. Omitted, the first paragraph is used.
 
 Markdown body follows the closing `---`. One post per file. The date prefix in the filename should
 match the `date` field. A post that violates the contract fails the build, so validate before
@@ -61,6 +64,7 @@ title: About
 - `title` (string, required) is the only required field.
 - `slug` (string, optional) sets the output filename; it falls back to the filename.
 - `draft` (boolean, optional) behaves as it does for posts.
+- `description` (string, optional) behaves as it does for posts.
 - Pages have NO `date` and NO `tags`. Do not add them.
 
 Pages render flat as `<slug>.html`, exactly like posts, but they never appear in the index list,
@@ -134,7 +138,9 @@ static/              copied verbatim to the site root (favicons, robots.txt, CNA
 
 **Reach for `theme/templates/head.html` first.** It is empty by default and is injected last in
 `<head>`, which covers most of what people actually want: web fonts, favicons, social meta, a
-pre-paint theme script. Because it lands last, it wins over the built-in font links and stylesheet,
+pre-paint theme script. The build already emits `<meta name="description">` and `og:description`
+from the page's own `description` or first paragraph, so adding one here gives the page two.
+Because it lands last, it wins over the built-in font links and stylesheet,
 and you never take ownership of `base.html`.
 
 Overriding `base.html` is the heavy option, and it makes you responsible for four things the rest of
