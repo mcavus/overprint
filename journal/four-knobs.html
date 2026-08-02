@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta name="robots" content="noindex">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+
+<title>Four knobs and a cream page · Studio Journal</title>
+<meta name="description" content="I put off starting this journal for two years, and the reason was always the same: I did not want to spend a weekend picking a typeface. I have watched that wee…">
+<meta property="og:description" content="I put off starting this journal for two years, and the reason was always the same: I did not want to spend a weekend picking a typeface. I have watched that wee…">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Source+Serif+4:ital,wght@0,400;0,600;1,400&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/style.css">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+<style>:root{ --accent: #C2410C; --display: "Inter", -apple-system, BlinkMacSystemFont, "Helvetica Neue", Arial, sans-serif; --paper: #F5EBDC; }</style>
+
+<link rel="icon" href="favicon.png">
+
+</head>
+<body>
+<main class="wrap">
+
+<div class="post-topbar">
+  <p class="post-back"><a href="index.html">&larr; Studio Journal</a></p>
+  <nav class="site-nav"><a href="index.html">Journal</a><a href="about.html">About</a><a href="colophon.html">Colophon</a></nav>
+
+</div>
+<article class="post">
+  <h1 class="post-title">Four knobs and a cream page</h1>
+  <div class="post-meta">FEB 17, 2026 &middot; Nadia Ellsworth</div>
+  <p>I put off starting this journal for two years, and the reason was always the same: I did not want
+to spend a weekend picking a typeface. I have watched that weekend turn into a month. The shelves
+never get built because the site about the shelves is not done.</p>
+<p>So the deal I made with myself was that the look of this thing would be decided in one sitting,
+from a fixed menu, and then never revisited. Overprint made that easy, because there are exactly
+four knobs. Here is the whole of it, sitting in <code>overprint.yml</code>:</p>
+<pre><code class="language-yaml">theme:
+  mode: light
+  accent: &quot;#C2410C&quot;
+  font: sans
+  background: &quot;#F5EBDC&quot;
+</code></pre><p>That is the entire visual specification of this site. Four lines.</p>
+<p><strong><code>mode</code></strong> is <code>light</code> or <code>dark</code>. It decides the family of decisions everything else inherits: text
+color, surface color, how borders are drawn, whether the page reads as paper or as a screen at
+night. I picked light because I read long entries in the afternoon with the shop door open, and
+dark text on a pale ground survives that better.</p>
+<p><strong><code>accent</code></strong> is a hex color, and it is the only saturated thing on the page. It tints post titles
+and links. That is it. I spent about ten minutes here, which is nine minutes more than I had
+budgeted, and landed on <code>#C2410C</code>. It is roughly the color shellac goes over cherry after four
+coats, which is a thing I look at often enough that it reads as neutral to me.</p>
+<p><strong><code>font</code></strong> is <code>serif</code>, <code>sans</code>, or <code>mono</code>. Not a font name, a family choice. You cannot ask for
+Garamond here, and I have decided to be grateful about that.</p>
+<p><strong><code>background</code></strong> is optional, and it is the escape hatch. Set it and it overrides the page color
+that the mode would have given you, while leaving everything else about that mode alone. Mine is
+<code>#F5EBDC</code>, a warm cream. The rest of light mode still applies. I just did not want the gallery
+white.</p>
+<p>The whole sitting took twenty minutes. Then I went and cut the parts for a bench.</p>
+
+  <div class="post-tags"><a href="tag-theming.html">theming</a><a href="tag-process.html">process</a></div>
+</article>
+
+</main>
+<footer class="site-footer">
+<span>&copy; 2026 Nadia Ellsworth</span>
+<span><a class="built-with" href="https://overprint.mcavus.com/" rel="noopener">Built with Overprint</a></span>
+</footer>
+</body>
+</html>

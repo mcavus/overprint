@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta name="robots" content="noindex">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+
+<title>Pages, and what the nav is for · Studio Journal</title>
+<meta name="description" content="A woman emailed in June asking whether I take commissions, and I realized I had written forty thousand words about dovetails without ever writing down who I am…">
+<meta property="og:description" content="A woman emailed in June asking whether I take commissions, and I realized I had written forty thousand words about dovetails without ever writing down who I am…">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Source+Serif+4:ital,wght@0,400;0,600;1,400&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/style.css">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+<style>:root{ --accent: #C2410C; --display: "Inter", -apple-system, BlinkMacSystemFont, "Helvetica Neue", Arial, sans-serif; --paper: #F5EBDC; }</style>
+
+<link rel="icon" href="favicon.png">
+
+</head>
+<body>
+<main class="wrap">
+
+<div class="post-topbar">
+  <p class="post-back"><a href="index.html">&larr; Studio Journal</a></p>
+  <nav class="site-nav"><a href="index.html">Journal</a><a href="about.html">About</a><a href="colophon.html">Colophon</a></nav>
+
+</div>
+<article class="post">
+  <h1 class="post-title">Pages, and what the nav is for</h1>
+  <div class="post-meta">JUL 12, 2026 &middot; Nadia Ellsworth</div>
+  <p>A woman emailed in June asking whether I take commissions, and I realized I had written forty
+thousand words about dovetails without ever writing down who I am or where the shop is. Everything
+on this site was a journal entry, which meant everything was dated, everything was in the feed, and
+everything scrolled away.</p>
+<p>Some writing is not an entry. “About” is not an entry. A colophon is not an entry. They do not
+belong to a day, they should not turn up in the RSS feed, and they should not sit in a tag page
+between two posts about finishing schedules. They are just there, permanently, waiting for someone
+who wants them.</p>
+<p>That is what standalone pages are for. They live in <code>content/pages/</code> rather than
+<code>content/posts/</code>, one file per page, and their frontmatter is almost nothing:</p>
+<pre><code>---
+title: About
+---
+</code></pre><p>No date, no tags, no slug line, no draft flag. The slug comes from the filename, so <code>about.md</code>
+becomes <code>about.html</code>. A page is a title and a body, and it is the missing date that keeps it out of
+the post list, out of the feed, and out of the tag pages.</p>
+<p>Which raises the obvious question of how anyone finds them, since nothing links to a page
+automatically. That is the nav’s job. The nav is a list of labels and urls in <code>overprint.yml</code>, and
+it is the one place where the site’s structure is stated rather than inferred:</p>
+<pre><code class="language-yaml">nav:
+  - { label: Journal, url: index.html }
+  - { label: About, url: about.html }
+  - { label: Colophon, url: colophon.html }
+</code></pre><p><code>index.html</code> is the journal itself, and the other two are the pages I just wrote, in the order I
+want them read. A nav entry can also point at a tag page if you want a section that is
+really a filter, though I would be careful there, because a nav link to a tag with nothing in it is
+a promise the site cannot keep.</p>
+<p>I wrote both pages in an afternoon. The About is short and says where the shop is. The Colophon
+took longer, because explaining why the page is cream meant admitting I had a reason.</p>
+<p>I still have not written back to the woman who emailed.</p>
+
+  <div class="post-tags"><a href="tag-process.html">process</a><a href="tag-notes.html">notes</a></div>
+</article>
+
+</main>
+<footer class="site-footer">
+<span>&copy; 2026 Nadia Ellsworth</span>
+<span><a class="built-with" href="https://overprint.mcavus.com/" rel="noopener">Built with Overprint</a></span>
+</footer>
+</body>
+</html>

@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>Field Notes</title>
+    <link>https://overprint.mcavus.com/starter</link>
+    <atom:link href="https://overprint.mcavus.com/starter/feed.xml" rel="self" type="application/rss+xml" />
+    <description>A small personal blog about writing, kept as plain Markdown files in a folder.</description>
+    <item>
+      <title>Writing in the open without publishing</title>
+      <link>https://overprint.mcavus.com/starter/writing-in-the-open-without-publishing.html</link>
+      <guid isPermaLink="true">https://overprint.mcavus.com/starter/writing-in-the-open-without-publishing.html</guid>
+      <pubDate>Sat, 18 Jul 2026 00:00:00 +0000</pubDate>
+      <description>Most of what I write never becomes a post. It sits half finished for a week, gets a better opening paragraph, loses two paragraphs in the middle, and either tur…</description>
+    </item>
+    <item>
+      <title>The five fields at the top of every post</title>
+      <link>https://overprint.mcavus.com/starter/the-five-fields-at-the-top-of-every-post.html</link>
+      <guid isPermaLink="true">https://overprint.mcavus.com/starter/the-five-fields-at-the-top-of-every-post.html</guid>
+      <pubDate>Sat, 27 Jun 2026 00:00:00 +0000</pubDate>
+      <description>Every post in this folder starts with a small block of YAML between two lines of three hyphens. That block is called frontmatter, and it is the only structured…</description>
+    </item>
+    <item>
+      <title>Welcome to Field Notes</title>
+      <link>https://overprint.mcavus.com/starter/welcome-to-field-notes.html</link>
+      <guid isPermaLink="true">https://overprint.mcavus.com/starter/welcome-to-field-notes.html</guid>
+      <pubDate>Mon, 08 Jun 2026 00:00:00 +0000</pubDate>
+      <description>This is the first entry in Field Notes, a small blog I keep about writing. It’s also the starting point of the Overprint tutorial, so it explains the one idea e…</description>
+    </item>
+  </channel>
+</rss>

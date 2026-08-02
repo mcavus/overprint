@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta name="robots" content="noindex">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+
+<title>There is no stylesheet to open · Studio Journal</title>
+<meta name="description" content="Two months in, I went looking for the CSS file. Not for a good reason. I had been reading an entry on my phone and decided the space above the post titles was f…">
+<meta property="og:description" content="Two months in, I went looking for the CSS file. Not for a good reason. I had been reading an entry on my phone and decided the space above the post titles was f…">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Source+Serif+4:ital,wght@0,400;0,600;1,400&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/style.css">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+<style>:root{ --accent: #C2410C; --display: "Inter", -apple-system, BlinkMacSystemFont, "Helvetica Neue", Arial, sans-serif; --paper: #F5EBDC; }</style>
+
+<link rel="icon" href="favicon.png">
+
+</head>
+<body>
+<main class="wrap">
+
+<div class="post-topbar">
+  <p class="post-back"><a href="index.html">&larr; Studio Journal</a></p>
+  <nav class="site-nav"><a href="index.html">Journal</a><a href="about.html">About</a><a href="colophon.html">Colophon</a></nav>
+
+</div>
+<article class="post">
+  <h1 class="post-title">There is no stylesheet to open</h1>
+  <div class="post-meta">MAY 3, 2026 &middot; Nadia Ellsworth</div>
+  <p>Two months in, I went looking for the CSS file. Not for a good reason. I had been reading an entry
+on my phone and decided the space above the post titles was four pixels too tight, which is the
+kind of judgment you should not trust from a person holding a phone in a parking lot.</p>
+<p>There is no CSS file. I opened the site folder and it is <code>overprint.yml</code>, a <code>content</code> directory,
+and nothing else. No <code>style.css</code>, no theme folder, no partials I could quietly start editing at
+eleven at night.</p>
+<p>My first reaction was annoyance. My second, about a day later, was relief.</p>
+<p>Here is what I would have done with a stylesheet, because I have done it before. I would have
+adjusted the leading. Then the measure would have looked wrong at the new leading, so I would have
+narrowed the column. Then the tag chips would have looked heavy against the narrower column, so I
+would have restyled those. Somewhere in there I would have added a hairline rule under the titles,
+removed it, and added it back. Two weekends, minimum, and at the end of it the site would look
+about four percent better and I would have written nothing.</p>
+<p>The theme block is the only styling knob. If I want a different look, I change one of four values
+and the whole site moves together, consistently, in a way I could not have hand-maintained. If I
+want a look the four values cannot express, I do not get it. That is the trade, stated plainly, and
+it is a good trade for someone whose actual work is joinery.</p>
+<p>I did try <code>font: serif</code> for a week in March, just to see. It was genuinely more beautiful. Every
+entry looked like it had been edited by someone, which was a problem, because these are notes
+written with sawdust on my hands and they should look like notes. I set it back to <code>sans</code> and have
+not touched the block since.</p>
+<p>The four-pixels-too-tight thing, for the record, was a phone in bright sun. On the bench it looks
+fine.</p>
+
+  <div class="post-tags"><a href="tag-theming.html">theming</a><a href="tag-notes.html">notes</a></div>
+</article>
+
+</main>
+<footer class="site-footer">
+<span>&copy; 2026 Nadia Ellsworth</span>
+<span><a class="built-with" href="https://overprint.mcavus.com/" rel="noopener">Built with Overprint</a></span>
+</footer>
+</body>
+</html>

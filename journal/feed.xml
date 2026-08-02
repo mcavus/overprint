@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>Studio Journal</title>
+    <link>https://overprint.mcavus.com/journal</link>
+    <atom:link href="https://overprint.mcavus.com/journal/feed.xml" rel="self" type="application/rss+xml" />
+    <description>Notes on craft, process, and the small decisions that add up to a finished thing.</description>
+    <item>
+      <title>Pages, and what the nav is for</title>
+      <link>https://overprint.mcavus.com/journal/pages-and-nav.html</link>
+      <guid isPermaLink="true">https://overprint.mcavus.com/journal/pages-and-nav.html</guid>
+      <pubDate>Sun, 12 Jul 2026 00:00:00 +0000</pubDate>
+      <description>A woman emailed in June asking whether I take commissions, and I realized I had written forty thousand words about dovetails without ever writing down who I am…</description>
+    </item>
+    <item>
+      <title>There is no stylesheet to open</title>
+      <link>https://overprint.mcavus.com/journal/no-stylesheet.html</link>
+      <guid isPermaLink="true">https://overprint.mcavus.com/journal/no-stylesheet.html</guid>
+      <pubDate>Sun, 03 May 2026 00:00:00 +0000</pubDate>
+      <description>Two months in, I went looking for the CSS file. Not for a good reason. I had been reading an entry on my phone and decided the space above the post titles was f…</description>
+    </item>
+    <item>
+      <title>Four knobs and a cream page</title>
+      <link>https://overprint.mcavus.com/journal/four-knobs.html</link>
+      <guid isPermaLink="true">https://overprint.mcavus.com/journal/four-knobs.html</guid>
+      <pubDate>Tue, 17 Feb 2026 00:00:00 +0000</pubDate>
+      <description>I put off starting this journal for two years, and the reason was always the same: I did not want to spend a weekend picking a typeface. I have watched that wee…</description>
+    </item>
+  </channel>
+</rss>

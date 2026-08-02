@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta name="robots" content="noindex">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+
+<title>Welcome to Field Notes · Field Notes</title>
+<meta name="description" content="This is the first entry in Field Notes, a small blog I keep about writing. It’s also the starting point of the Overprint tutorial, so it explains the one idea e…">
+<meta property="og:description" content="This is the first entry in Field Notes, a small blog I keep about writing. It’s also the starting point of the Overprint tutorial, so it explains the one idea e…">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Source+Serif+4:ital,wght@0,400;0,600;1,400&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/style.css">
+
+<style>:root{ --accent: #0A7AFF; --display: "Source Serif 4", Georgia, "Times New Roman", serif; }</style>
+
+<link rel="icon" href="favicon.png">
+
+</head>
+<body>
+<main class="wrap">
+
+<div class="post-topbar">
+  <p class="post-back"><a href="index.html">&larr; Field Notes</a></p>
+  <nav class="site-nav"><a href="index.html">Writing</a><a href="tag-basics.html">Basics</a><a href="about.html">About</a></nav>
+
+</div>
+<article class="post">
+  <h1 class="post-title">Welcome to Field Notes</h1>
+  <div class="post-meta">JUN 8, 2026 &middot; Tessa Lindqvist</div>
+  <p>This is the first entry in Field Notes, a small blog I keep about writing. It’s also the
+starting point of the Overprint tutorial, so it explains the one idea everything else
+rests on.</p>
+<h2>The folder is the site</h2><p>Open the folder this post lives in and you can see the whole site at once:</p>
+<pre><code>overprint.yml
+content/
+  posts/
+    2026-06-08-welcome-to-field-notes.md
+  pages/
+    about.md
+</code></pre><p>That’s it. <code>overprint.yml</code> holds the title, the author, the theme, and the navigation.
+Everything under <code>content/posts</code> becomes an entry in the list you are reading. Everything
+under <code>content/pages</code> becomes a standalone page like About.</p>
+<p>The files on disk are the site. There’s no database, and no copy of your writing living
+somewhere you can’t see. If a file is there, it gets built. Delete it and it stops
+existing.</p>
+<h2>Why that matters</h2><p>Because you can’t lose work you can still open. These are plain Markdown files with a few
+lines of YAML at the top. You can open them in Overprint, in a text editor, in a
+terminal, on a different machine ten years from now. Put the folder in a git repository
+and you get version history for free. Put it in a synced folder and you can write on
+either computer.</p>
+<p>And anything can edit them. Overprint is a comfortable place to write, but it isn’t the
+only door into this folder. A script can add a post; so can you, in whatever editor you
+already have open. You’re not asking an app for permission to touch your own prose.</p>
+<h2>Running this site</h2><p>From the folder, start the local preview:</p>
+<pre><code>overprint serve
+</code></pre><p>That builds the site into <code>dist/</code> and serves it at <code>http://localhost:4321</code>. It builds once,
+so restart it after a round of edits. The app watches the folder and reloads its preview as
+you type, which is the nicer way to write. For a build with no server, use <code>overprint build</code>.</p>
+<p>Never edit anything inside <code>dist/</code>. It is generated output, and the next build will
+overwrite it. Your work belongs in <code>content/</code>.</p>
+<h2>Where to go next</h2><p>Read the next two posts in order. The first explains the block of YAML at the top of
+every post and what each field controls. The second explains drafts, which is how you
+keep something out of the public site while you are still figuring out what it says.</p>
+<p>After that, delete these posts. They exist to be read once and thrown away, and the
+folder is more useful to you empty.</p>
+
+  <div class="post-tags"><a href="tag-writing.html">writing</a><a href="tag-overprint.html">overprint</a><a href="tag-basics.html">basics</a></div>
+</article>
+
+</main>
+<footer class="site-footer">
+<span>&copy; 2026 Tessa Lindqvist</span>
+<span><a class="built-with" href="https://overprint.mcavus.com/" rel="noopener">Built with Overprint</a></span>
+</footer>
+</body>
+</html>

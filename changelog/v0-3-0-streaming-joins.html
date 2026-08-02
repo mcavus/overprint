@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta name="robots" content="noindex">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+
+<title>v0.3.0, streaming joins · Release Notes</title>
+<meta name="description" content="Two and a half months of work, most of it spent deleting things.">
+<meta property="og:description" content="Two and a half months of work, most of it spent deleting things.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Source+Serif+4:ital,wght@0,400;0,600;1,400&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/style.css">
+
+<style>:root{ --accent: #F5A623; --display: "JetBrains Mono", ui-monospace, "SF Mono", Menlo, monospace; --paper: #14141b; --ink: #f3f3f5; --body: #c9c9d2; --muted: #9a9aa6; --faint: #7c7c88; --rule: rgba(255,255,255,0.16); --rule-soft: rgba(255,255,255,0.10); --code-bg: #24242e; }</style>
+
+<link rel="icon" href="favicon.png">
+
+</head>
+<body>
+<main class="wrap">
+
+<div class="post-topbar">
+  <p class="post-back"><a href="index.html">&larr; Release Notes</a></p>
+  <nav class="site-nav"><a href="index.html">Releases</a><a href="tag-release.html">Releases tag</a><a href="about.html">About</a></nav>
+
+</div>
+<article class="post">
+  <h1 class="post-title">v0.3.0, streaming joins</h1>
+  <div class="post-meta">APR 28, 2026 &middot; Dagny Halvorsen</div>
+  <p>Two and a half months of work, most of it spent deleting things.</p>
+<h2>Joins no longer buffer</h2><p>The old <code>shard join</code> read every piece into memory, verified the checksums, concatenated the buffers, and wrote the result. That is fine for a 200 MB dump on a laptop with 32 GB of memory. It is not fine for a 40 GB dump on a build agent with 4 GB, which is where three separate people hit it and filed three separate issues that were all the same issue.</p>
+<p>Joins are now fully streaming. shard reads each piece in 1 MB frames, updates the running checksum as it goes, and writes straight through to the output. Peak memory during a join is now flat at roughly 4 MB regardless of input size.</p>
+<p>The numbers on my machine, joining a 40 GB set of 800 pieces:</p>
+<table>
+<thead>
+<tr>
+<th>version</th>
+<th>wall time</th>
+<th>peak memory</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>v0.2.0</td>
+<td>out of memory</td>
+<td>out of memory</td>
+</tr>
+<tr>
+<td>v0.3.0</td>
+<td>3m 41s</td>
+<td>4.1 MB</td>
+</tr>
+</tbody>
+</table>
+<p>Splitting got faster too, though less dramatically. Reusing a single output buffer instead of allocating per chunk cut split time on the same file from 5m 02s to 4m 18s. Not glamorous, but free.</p>
+<h2>Parallel checksums</h2><p>If you pass <code>--jobs N</code>, verification now runs across N threads. Checksums are the dominant cost on a fast disk, so this scales close to linearly up to about six threads before the disk becomes the ceiling again. The default is one job, because a tool that saturates every core by surprise is a rude tool.</p>
+<h2>Smaller binary</h2><p>Dropping two dependencies that each existed to provide one function took the release binary from 8.9 MB to 3.2 MB. Both functions were about twenty lines. I should have written them myself two years ago.</p>
+<h2>About these notes</h2><p>Continuing the tour of how this site is built.</p>
+<p>Writing an entry is just editing Markdown, but you want to see it before anyone else does:</p>
+<pre><code>overprint serve
+</code></pre><p>That builds the site and serves it on localhost with live reload, so saving the file refreshes the page. Drafts are included when you serve, which is the point, since you are usually looking at the thing you have not published yet.</p>
+<p>When you want the real output on disk:</p>
+<pre><code>overprint build
+</code></pre><p>That writes <code>dist/</code>, and it leaves drafts out. A post with <code>draft: true</code> in its frontmatter exists on your disk and nowhere else. It does not appear in the index, it does not appear on any tag page, and it does not appear in the RSS feed. There is no separate staging site to manage. Flipping the flag to <code>false</code> and rebuilding is the entire publishing step.</p>
+<h2>More on tags</h2><p>This entry is tagged <code>release</code>, <code>performance</code>, and <code>cli</code>, so it will show up on three different listing pages. Tag pages are generated from what the posts actually say, not from a list you maintain by hand, which means a tag page cannot go stale and cannot point at nothing.</p>
+<p>That does create one sharp edge worth knowing about. If you link to a tag page from your navigation, and later you remove the last post carrying that tag, the page stops being generated and your navigation link goes to a 404. This is why I keep the vocabulary small and only link <code>tag-release.html</code> from the nav bar: every release entry carries <code>release</code>, so that page will exist for as long as this site does.</p>
+
+  <div class="post-tags"><a href="tag-release.html">release</a><a href="tag-performance.html">performance</a><a href="tag-cli.html">cli</a></div>
+</article>
+
+</main>
+<footer class="site-footer">
+<span>&copy; 2026 Dagny Halvorsen</span>
+<span><a class="built-with" href="https://overprint.mcavus.com/" rel="noopener">Built with Overprint</a></span>
+</footer>
+</body>
+</html>

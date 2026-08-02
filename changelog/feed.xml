@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>Release Notes</title>
+    <link>https://overprint.mcavus.com/changelog</link>
+    <atom:link href="https://overprint.mcavus.com/changelog/feed.xml" rel="self" type="application/rss+xml" />
+    <description>Release notes for shard, a small command line tool for splitting and reassembling large text files.</description>
+    <item>
+      <title>v0.4.0, faster builds</title>
+      <link>https://overprint.mcavus.com/changelog/v0-4-0-faster-builds.html</link>
+      <guid isPermaLink="true">https://overprint.mcavus.com/changelog/v0-4-0-faster-builds.html</guid>
+      <pubDate>Wed, 15 Jul 2026 00:00:00 +0000</pubDate>
+      <description>The release I have wanted to ship since the project started. Splitting is now roughly four times faster on large files, and the command line interface finally b…</description>
+    </item>
+    <item>
+      <title>v0.3.0, streaming joins</title>
+      <link>https://overprint.mcavus.com/changelog/v0-3-0-streaming-joins.html</link>
+      <guid isPermaLink="true">https://overprint.mcavus.com/changelog/v0-3-0-streaming-joins.html</guid>
+      <pubDate>Tue, 28 Apr 2026 00:00:00 +0000</pubDate>
+      <description>Two and a half months of work, most of it spent deleting things.</description>
+    </item>
+    <item>
+      <title>v0.2.0, manifests and checksums</title>
+      <link>https://overprint.mcavus.com/changelog/v0-2-0-manifests-and-checksums.html</link>
+      <guid isPermaLink="true">https://overprint.mcavus.com/changelog/v0-2-0-manifests-and-checksums.html</guid>
+      <pubDate>Mon, 09 Feb 2026 00:00:00 +0000</pubDate>
+      <description>First release of the year, and the first one where I feel comfortable telling people to use shard on data they care about.</description>
+    </item>
+  </channel>
+</rss>

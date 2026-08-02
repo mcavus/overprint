@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta name="robots" content="noindex">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+
+<title>The five fields at the top of every post · Field Notes</title>
+<meta name="description" content="Every post in this folder starts with a small block of YAML between two lines of three hyphens. That block is called frontmatter, and it is the only structured…">
+<meta property="og:description" content="Every post in this folder starts with a small block of YAML between two lines of three hyphens. That block is called frontmatter, and it is the only structured…">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Source+Serif+4:ital,wght@0,400;0,600;1,400&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/style.css">
+
+<style>:root{ --accent: #0A7AFF; --display: "Source Serif 4", Georgia, "Times New Roman", serif; }</style>
+
+<link rel="icon" href="favicon.png">
+
+</head>
+<body>
+<main class="wrap">
+
+<div class="post-topbar">
+  <p class="post-back"><a href="index.html">&larr; Field Notes</a></p>
+  <nav class="site-nav"><a href="index.html">Writing</a><a href="tag-basics.html">Basics</a><a href="about.html">About</a></nav>
+
+</div>
+<article class="post">
+  <h1 class="post-title">The five fields at the top of every post</h1>
+  <div class="post-meta">JUN 27, 2026 &middot; Tessa Lindqvist</div>
+  <p>Every post in this folder starts with a small block of YAML between two lines of three
+hyphens. That block is called frontmatter, and it is the only structured data a post
+carries. Here is the whole thing, exactly as it appears at the top of the file you are
+reading:</p>
+<pre><code class="language-yaml">---
+title: The five fields at the top of every post
+date: 2026-06-27
+tags: [overprint, basics]
+slug: the-five-fields-at-the-top-of-every-post
+draft: false
+---
+</code></pre><p>Below the closing hyphens, everything is ordinary Markdown. The block above is the whole
+of the structured part, and these are the five fields in it.</p>
+<h2>title</h2><p>The headline. It appears at the top of the post, in the list on the home page, in the
+browser tab, and in the RSS feed. Write it as a sentence rather than in title case, unless
+you prefer otherwise. Quote it if it contains a colon, because YAML reads a bare colon as
+a separator.</p>
+<h2>date</h2><p>The publication date in <code>YYYY-MM-DD</code> form. Posts are sorted newest first, so this is
+what decides the order of the list. It is also what shows under each entry.</p>
+<p>The date does double duty: it’s also the first part of the filename. This post lives at
+<code>content/posts/2026-06-27-the-five-fields-at-the-top-of-every-post.md</code>, and the date in
+the filename has to match the date in the frontmatter. Nothing keeps them in step for
+you, so if you change one, change the other. <code>overprint validate</code> will tell you if you
+forget.</p>
+<h2>tags</h2><p>A list of short labels, written as <code>[one, two]</code>. Each tag gets its own page in the built
+site, at <code>tag-&lt;name&gt;.html</code>, listing every published post that carries it. That page name
+is how you link to a tag from the navigation in <code>overprint.yml</code>, which is exactly what
+the Basics link in the header of this site does.</p>
+<p>Keep the set small. Three or four tags that mean something are better than twenty that
+each apply to one post. This site uses <code>writing</code>, <code>overprint</code>, and <code>basics</code>.</p>
+<h2>slug</h2><p>The name this post gets on the web. A slug of <code>the-five-fields-at-the-top-of-every-post</code>
+produces <code>the-five-fields-at-the-top-of-every-post.html</code>. Lowercase letters, numbers, and
+hyphens only.</p>
+<p>Like the date, the slug appears twice: once in the frontmatter and once in the filename
+after the date prefix. They must match. Once a post is published, changing the slug
+changes its address and breaks every link to it, so pick one you can live with.</p>
+<h2>draft</h2><p>Either <code>true</code> or <code>false</code>. A post with <code>draft: true</code> is kept out of the built site, but
+you’ll still see it while previewing locally, so you can tell how it looks before anyone
+else does. The next post covers this in detail, because it is the field people get wrong
+most often.</p>
+<h2>Checking your work</h2><p>If you edited a file by hand and want to be sure you didn’t break anything:</p>
+<pre><code>overprint validate
+</code></pre><p>That walks every post, checks the five fields, and tells you about mismatched filenames,
+missing dates, and malformed YAML. Run it before you publish. It takes a second and
+catches the boring mistakes.</p>
+
+  <div class="post-tags"><a href="tag-overprint.html">overprint</a><a href="tag-basics.html">basics</a></div>
+</article>
+
+</main>
+<footer class="site-footer">
+<span>&copy; 2026 Tessa Lindqvist</span>
+<span><a class="built-with" href="https://overprint.mcavus.com/" rel="noopener">Built with Overprint</a></span>
+</footer>
+</body>
+</html>

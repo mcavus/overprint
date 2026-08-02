@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta name="robots" content="noindex">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+
+<title>v0.4.0, faster builds · Release Notes</title>
+<meta name="description" content="The release I have wanted to ship since the project started. Splitting is now roughly four times faster on large files, and the command line interface finally b…">
+<meta property="og:description" content="The release I have wanted to ship since the project started. Splitting is now roughly four times faster on large files, and the command line interface finally b…">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Source+Serif+4:ital,wght@0,400;0,600;1,400&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/style.css">
+
+<style>:root{ --accent: #F5A623; --display: "JetBrains Mono", ui-monospace, "SF Mono", Menlo, monospace; --paper: #14141b; --ink: #f3f3f5; --body: #c9c9d2; --muted: #9a9aa6; --faint: #7c7c88; --rule: rgba(255,255,255,0.16); --rule-soft: rgba(255,255,255,0.10); --code-bg: #24242e; }</style>
+
+<link rel="icon" href="favicon.png">
+
+</head>
+<body>
+<main class="wrap">
+
+<div class="post-topbar">
+  <p class="post-back"><a href="index.html">&larr; Release Notes</a></p>
+  <nav class="site-nav"><a href="index.html">Releases</a><a href="tag-release.html">Releases tag</a><a href="about.html">About</a></nav>
+
+</div>
+<article class="post">
+  <h1 class="post-title">v0.4.0, faster builds</h1>
+  <div class="post-meta">JUL 15, 2026 &middot; Dagny Halvorsen</div>
+  <p>The release I have wanted to ship since the project started. Splitting is now roughly four times faster on large files, and the command line interface finally behaves the way I always described it in the README.</p>
+<h2>Faster splits</h2><p>The split path used to make one syscall per chunk boundary and one allocation per chunk. On a file with a hundred thousand boundaries that adds up to real time spent doing nothing useful.</p>
+<p>Three changes did most of the work. Reads now come through a memory mapped window rather than a buffered reader, boundary scanning uses a vectorized search instead of a byte at a time loop, and output pieces are written through a reusable buffer pool instead of a fresh allocation each time.</p>
+<p>Splitting a 40 GB dump on 50000 line boundaries:</p>
+<table>
+<thead>
+<tr>
+<th>version</th>
+<th>wall time</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>v0.2.0</td>
+<td>5m 02s</td>
+</tr>
+<tr>
+<td>v0.3.0</td>
+<td>4m 18s</td>
+</tr>
+<tr>
+<td>v0.4.0</td>
+<td>1m 07s</td>
+</tr>
+</tbody>
+</table>
+<p>Regular expression boundaries benefit less, around a 40 percent improvement, because the regex engine is the bottleneck there and I have not touched it.</p>
+<h2>Command line changes</h2><p>Two breaking changes, both of which I am sorry about and neither of which I regret.</p>
+<p><code>--out</code> is now <code>--output</code>, consistently across every subcommand. The short form <code>-o</code> still works. Previously <code>split</code> used <code>--out</code> and <code>join</code> used <code>--dest</code>, which was indefensible.</p>
+<p><code>shard verify</code> is now its own subcommand rather than a flag on <code>join</code>. Verifying a set of pieces without writing anything is a thing people do constantly in CI, and making them join into <code>/dev/null</code> to do it was silly.</p>
+<p>Old invocations print a clear deprecation message and still work through v0.5.0.</p>
+<h2>Fixes</h2><ul>
+<li><p>A manifest with a trailing blank line was rejected as malformed. It is now accepted.</p>
+</li>
+<li><p><code>shard join</code> on a read only output directory failed after reading every piece rather than before reading any of them. It now checks first.</p>
+</li>
+<li><p>Piece filenames with more than four digits sorted lexically, so piece 10000 landed between 1 and 2. Padding is now computed from the piece count.</p>
+</li>
+<li><p>The progress bar wrote escape codes when stdout was not a terminal, which made log files unreadable. It now detects a pipe and prints plain lines instead.</p>
+</li>
+</ul>
+<h2>About these notes</h2><p>Last part of the tour, and the important one.</p>
+<p>Before publishing anything, run:</p>
+<pre><code>overprint validate
+</code></pre><p>That checks every post and page under <code>content/</code>. It confirms the config loads, that the frontmatter parses, that the required fields are present, that each post date is a real date in <code>YYYY-MM-DD</code> form, and that no two posts or pages claim the same slug.</p>
+<p>That last one matters more than it sounds. A slug becomes <code>&lt;slug&gt;.html</code>, so two files claiming the same slug means one quietly overwrites the other in the output. Run validate before every deploy, without exception. A broken build is obvious and you fix it in a minute. A post that silently vanished is the kind of thing you discover six weeks later when someone emails to ask where it went.</p>
+<p>So the whole loop, from nothing to a published entry, is five commands:</p>
+<pre><code>overprint init ./release-notes
+overprint new &quot;v0.4.0, faster builds&quot;
+overprint serve
+overprint validate
+overprint build
+</code></pre><p>Everything else is writing.</p>
+<h2>One more note on tags</h2><p>This entry carries all four tags I use here, so it appears on <code>tag-release.html</code>, <code>tag-performance.html</code>, <code>tag-fixes.html</code>, and <code>tag-cli.html</code>. That is deliberate: it is a release, it contains speed work, it contains bug fixes, and it changes the command line interface. Someone who only follows the performance page should still see this one, because the thing they care about is in it.</p>
+<p>The rule I have settled on after three releases is to tag for the reader who is filtering, not for the reader who is browsing. Browsing readers have the front page. Filtering readers have a specific question, and a tag is only useful if it answers that question the same way every time.</p>
+
+  <div class="post-tags"><a href="tag-release.html">release</a><a href="tag-performance.html">performance</a><a href="tag-fixes.html">fixes</a><a href="tag-cli.html">cli</a></div>
+</article>
+
+</main>
+<footer class="site-footer">
+<span>&copy; 2026 Dagny Halvorsen</span>
+<span><a class="built-with" href="https://overprint.mcavus.com/" rel="noopener">Built with Overprint</a></span>
+</footer>
+</body>
+</html>
