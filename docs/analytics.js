@@ -1,12 +1,6 @@
 /* Cloudflare Web Analytics. Cookieless, so no consent banner is required.
    Token comes from dash.cloudflare.com > Analytics & Logs > Web Analytics.
-   It is not a secret; it ships in the page either way.
-
-   A beacon rather than Cloudflare's automatic injection: mcavus.com's DNS is on Google's
-   nameservers and the zone is not proxied through Cloudflare, so automatic setup is unavailable.
-
-   This site has its own token, separate from mcavus.com and blog.mcavus.com, so the three sets of
-   numbers stay apart instead of needing a hostname filter to read. */
+   It is not a secret; it ships in the page either way. */
 var CF_BEACON_TOKEN = "2b0133beaf7243d59bdb45b6599ec257";
 
 (function () {

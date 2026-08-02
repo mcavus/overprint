@@ -111,6 +111,21 @@ public struct GitDeploy: Sendable {
 
     // MARK: Deploy
 
+    /// The host to write into `CNAME` for `url`, or nil when the domain is not this site's to claim.
+    ///
+    /// A `CNAME` claims a whole host for one repository. Nil for a `github.io` address, which needs
+    /// no custom domain, and nil when `url` carries a path: a path means the site is served under
+    /// another site's host, so the file would take a domain belonging to that one. `basePath` decides
+    /// what counts as a path, so a bare trailing slash does not.
+    public static func customDomain(from url: String) -> String? {
+        let trimmed = url.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !trimmed.isEmpty else { return nil }
+        let withScheme = trimmed.contains("://") ? trimmed : "https://\(trimmed)"
+        guard let host = URLComponents(string: withScheme)?.host, !host.isEmpty else { return nil }
+        guard SiteBuilder.basePath(from: withScheme) == "/" else { return nil }
+        return host.hasSuffix("github.io") ? nil : host
+    }
+
     /// Publishes the contents of `distURL` to `branch` on `remote` (a URL or path) as a single
     /// force-pushed commit. Writes `CNAME` when a custom domain is given, plus `.nojekyll`.
     /// Branches that must never receive a force-pushed `dist/`. Publishing replaces the branch

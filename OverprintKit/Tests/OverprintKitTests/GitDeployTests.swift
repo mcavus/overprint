@@ -282,3 +282,45 @@ func realDeployToRemote() throws {
         try GitDeploy(author: testAuthor).publish(distURL: missing, remote: base.appendingPathComponent("r.git").path)
     }
 }
+
+@Test func customDomainClaimsOnlyAHostThisSiteOwns() {
+    // A host at the root of the url is ours to claim, with or without a trailing slash.
+    #expect(GitDeploy.customDomain(from: "https://blog.example.com") == "blog.example.com")
+    #expect(GitDeploy.customDomain(from: "https://blog.example.com/") == "blog.example.com")
+    #expect(GitDeploy.customDomain(from: "blog.example.com") == "blog.example.com")
+
+    // A path means another site owns the host.
+    #expect(GitDeploy.customDomain(from: "https://example.com/blog") == nil)
+    #expect(GitDeploy.customDomain(from: "https://example.com/blog/") == nil)
+    #expect(GitDeploy.customDomain(from: "https://example.com/a/b") == nil)
+    #expect(GitDeploy.customDomain(from: "example.com/blog") == nil)
+
+    // A github.io address needs no custom domain.
+    #expect(GitDeploy.customDomain(from: "https://ada.github.io") == nil)
+    #expect(GitDeploy.customDomain(from: "https://ada.github.io/notes") == nil)
+
+    #expect(GitDeploy.customDomain(from: "") == nil)
+    #expect(GitDeploy.customDomain(from: "   ") == nil)
+}
+
+@Test func publishWritesNoCNAMEForASiteUnderAnotherHost() throws {
+    let fm = FileManager.default
+    let base = fm.temporaryDirectory.appendingPathComponent("op-subdir-\(UUID().uuidString)")
+    try fm.createDirectory(at: base, withIntermediateDirectories: true)
+    defer { try? fm.removeItem(at: base) }
+
+    let dist = base.appendingPathComponent("dist")
+    try fm.createDirectory(at: dist, withIntermediateDirectories: true)
+    try "<html>hello</html>".write(to: dist.appendingPathComponent("index.html"), atomically: true, encoding: .utf8)
+
+    let bare = base.appendingPathComponent("remote.git")
+    try git(["init", "--bare", bare.path], in: base)
+
+    let cname = GitDeploy.customDomain(from: "https://example.com/blog")
+    try GitDeploy(author: testAuthor).publish(distURL: dist, remote: bare.path, branch: "gh-pages", cname: cname)
+
+    let tree = try git(["--git-dir", bare.path, "ls-tree", "-r", "gh-pages", "--name-only"], in: base)
+    #expect(!tree.contains("CNAME"))
+    #expect(tree.contains("index.html"))
+    #expect(tree.contains(".nojekyll"))
+}

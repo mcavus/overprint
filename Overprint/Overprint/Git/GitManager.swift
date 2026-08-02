@@ -224,13 +224,8 @@ final class GitManager: ObservableObject {
 
     // MARK: Helpers
 
-    /// The host of `url` when it is a custom domain (not a github.io page), for the CNAME file.
     static func customDomain(from url: String) -> String? {
-        let trimmed = url.trimmingCharacters(in: .whitespacesAndNewlines)
-        guard !trimmed.isEmpty else { return nil }
-        let withScheme = trimmed.contains("://") ? trimmed : "https://\(trimmed)"
-        guard let host = URLComponents(string: withScheme)?.host, !host.isEmpty else { return nil }
-        return host.hasSuffix("github.io") ? nil : host
+        GitDeploy.customDomain(from: url)
     }
 
     private static func message(_ error: Error) -> String {
